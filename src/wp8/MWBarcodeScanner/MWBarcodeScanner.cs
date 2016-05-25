@@ -67,12 +67,13 @@ namespace Cordova.Extension.Commands
                 mwbScanner = this;
                 kallbackID = JsonHelper.Deserialize<string[]>(options)[0];
                 root.Navigate(new System.Uri("/Plugins/manateeworks-barcodescanner/ScannerPage.xaml", UriKind.Relative));
-
+                
                 root.Navigated += new System.Windows.Navigation.NavigatedEventHandler(root_Navigated);
             });
 
 
         }
+
 
 
         public void togglePauseResume(string options)
@@ -83,6 +84,17 @@ namespace Cordova.Extension.Commands
             }
         }
 
+        public void setActiveParser(string options)
+        {
+            string[] paramsList = JsonHelper.Deserialize<string[]>(options);
+            ScannerPage.param_parserMask = Convert.ToInt32(paramsList[0]);
+        }
+        public void registerParser(string options)
+        {
+            string[] paramsList = JsonHelper.Deserialize<string[]>(options);
+            Scanner.MWPregisterParser(Convert.ToInt32(paramsList[0]), paramsList[1], paramsList[2]);
+        }
+        
         public void setUseAutorect(string options)
         {
            useAutoRect = Convert.ToBoolean(JsonHelper.Deserialize<string[]>(options)[0]);
@@ -452,37 +464,44 @@ namespace Cordova.Extension.Commands
 
         public void closeScanner(string options)
         {
-            BarcodeScannerPage.ScannerPage.closeScanner = true;
+            if (canvas != null) 
+                stopScanner("");
+            else
+                BarcodeScannerPage.ScannerPage.closeScanner = true;
+
         }
         public void stopScanner(string options)
         {
             if (canvas != null)
             {
+                ScannerPage.isClosing = true;
                 Deployment.Current.Dispatcher.BeginInvoke(delegate()
                {
+                   if (scannerPage != null) {
+                       BarcodeScannerPage.ScannerPage.cameraDevice.Dispose();
+                       if ((int)ScannerPage.param_OverlayMode == 1)
+                       {
 
-                   BarcodeScannerPage.ScannerPage.cameraDevice.Dispose();
-                   if ((int)ScannerPage.param_OverlayMode == 1)
-                   {
+                           MWOverlay.removeOverlay();
+                       }
+                       else if ((int)ScannerPage.param_OverlayMode == 1)
+                       {
+                           canvas.Children.Remove(imgOverlay);
+                       }
 
-                       MWOverlay.removeOverlay();
+                       (currentPage.FindName("LayoutRoot") as Grid).Children.Remove(canvas);
+                       if (flashButton != null)
+                       {
+                           (currentPage.FindName("LayoutRoot") as Grid).Children.Remove(flashButton);
+                           flashButton = null;                
+                       }
+
+                       scannerPage.stopCamera();
+                       scannerPage = null;
+                       canvas = null;
+                       videoBrush = null;
+
                    }
-                   else if ((int)ScannerPage.param_OverlayMode == 1)
-                   {
-                       canvas.Children.Remove(imgOverlay);
-                   }
-
-                   (currentPage.FindName("LayoutRoot") as Grid).Children.Remove(canvas);
-                   if (flashButton != null)
-                   {
-                       (currentPage.FindName("LayoutRoot") as Grid).Children.Remove(flashButton);
-                       flashButton = null;                
-                   }
-
-                   scannerPage.stopCamera();
-                   scannerPage = null;
-                   canvas = null;
-                   videoBrush = null;
 
                });
             }

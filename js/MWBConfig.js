@@ -62,6 +62,30 @@ MWBSInitSpace.init = function(mwbs,constants,dvc){
                 'MWB_CODE_MASK_DOTCODE' : {'username':'','key':''}
                 }
         }
+
+        var registerParsers = {
+             'Android' : {
+                 'MWP_PARSER_MASK_GS1' : {'username' : '', 'key' : ''},
+                 'MWP_PARSER_MASK_IUID' : {'username':'','key':''},
+                 'MWP_PARSER_MASK_ISBT' : {'username':'','key':''},
+                 'MWP_PARSER_MASK_AAMVA' : {'username':'','key':''},
+                 'MWP_PARSER_MASK_HIBC' : {'username':'','key':''}
+             },
+             'iOS' : {
+                 'MWP_PARSER_MASK_GS1' : {'username' : '', 'key' : ''},
+                 'MWP_PARSER_MASK_IUID' : {'username':'','key':''},
+                 'MWP_PARSER_MASK_ISBT' : {'username':'','key':''},
+                 'MWP_PARSER_MASK_AAMVA' : {'username':'','key':''},
+                 'MWP_PARSER_MASK_HIBC' : {'username':'','key':''}
+             },
+             'Win32NT' : {
+                 'MWP_PARSER_MASK_GS1' : {'username' : '','key' : ''},
+                 'MWP_PARSER_MASK_IUID' : {'username':'','key':''},
+                 'MWP_PARSER_MASK_ISBT' : {'username':'','key':''},
+                 'MWP_PARSER_MASK_AAMVA' : {'username':'','key':''},
+                 'MWP_PARSER_MASK_HIBC' : {'username':'','key':''}
+             }
+         }
 //    }
 //    catch(e){
 //        console.log(e);
@@ -71,6 +95,14 @@ MWBSInitSpace.init = function(mwbs,constants,dvc){
     Object.keys(platform).forEach(function(reg_codes){
         mwbs['MWBregisterCode'](constants[reg_codes],platform[reg_codes]['username'],platform[reg_codes]['key']);
     });
+    
+     var platformParsers = registerParsers[dvc.platform];
+     Object.keys(platformParsers).forEach(function(reg_codes){
+          mwbs['MWBregisterParser'](constants[reg_codes],platformParsers[reg_codes]['username'],platformParsers[reg_codes]['key']);
+     });
+
+
+ 
 
     //settings portion, disable those that are not needed
 
@@ -96,7 +128,8 @@ MWBSInitSpace.init = function(mwbs,constants,dvc){
                   //  mwbs['MWBduplicateCodeDelay'](1000);      
                   //  mwbs['MWBuseAutoRect'](false);      
                   //  mwbs['MWBuseFrontCamera'](true);
-                                  
+                  //  mwbs['MWBsetActiveParser'](constants.MWP_PARSER_MASK_ISBT);
+
 
                     // console.log('JS Settings ends: '+ (new Date()).getTime());
             //    }

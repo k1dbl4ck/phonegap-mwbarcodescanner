@@ -103,6 +103,7 @@ typedef enum eMainScreenState {
 - (void) toggleTorch;
 + (BOOL) isFlashEnabled;
 + (BOOL) isZoomEnabled;
++ (void) setActiveParser: (int) parserType;
 
 
 @end

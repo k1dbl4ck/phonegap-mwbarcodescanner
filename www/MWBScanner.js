@@ -1,4 +1,8 @@
 /*
+    Version 1.9
+   
+    - Parsers
+    
     Version 1.8.8
    
     - Added support for android API 23 app permissions
@@ -312,7 +316,22 @@
      OrientationAll :              'All',
      OverlayModeNone :    0,
      OverlayModeMW :      1,
-     OverlayModeImage :   2
+     OverlayModeImage :   2,
+               
+               
+               
+               /**
+                * @name Bit mask identifiers for supported decoder types
+                * @{ */
+               MWP_PARSER_MASK_NONE :               0x00000000,
+               MWP_PARSER_MASK_GS1  :               0x00000001,
+               MWP_PARSER_MASK_IUID :               0x00000002,
+               MWP_PARSER_MASK_ISBT :               0x00000004,
+               MWP_PARSER_MASK_AAMVA:               0x00000008,
+               MWP_PARSER_MASK_HIBC :               0x00000010,
+               MWP_PARSER_MASK_AUTO :               0x0fffffff
+
+/** @} */
  };
  
  
@@ -368,6 +387,12 @@
  MWBregisterCode: function(codeMask, userName, key) {
     cordova.exec(function(){}, function(){}, "MWBarcodeScanner", "registerCode", [codeMask, userName, key]);
  },
+
+               
+               
+    MWBregisterParser: function(codeMask, userName, key) {
+    cordova.exec(function(){}, function(){}, "MWBarcodeScanner", "registerParser", [codeMask, userName, key]);
+    },
  
  /**
     * Sets active or inactive status of decoder types
@@ -466,7 +491,7 @@
     * OrientationLandscapeLeft
     * OrientationLandscapeRight
     *
-    * Default value is OrientationLandscapeLeft
+    * Default value is OrientationPortrait
     */
  MWBsetInterfaceOrientation: function(interfaceOrientation) {
     cordova.exec(function(){}, function(){}, "MWBarcodeScanner", "setInterfaceOrientation", [interfaceOrientation]);
@@ -645,6 +670,22 @@ MWBtoggleZoom: function() {
     */
    MWBuseFrontCamera: function(useFrontCamera) {
         cordova.exec(function(){}, function(){}, "MWBarcodeScanner", "useFrontCamera", [useFrontCamera]);
+   },
+   /**
+    *  Set active parser type
+    *
+    *  activeParser  Available options:
+    *                   MWP_PARSER_MASK_NONE
+    *                   MWP_PARSER_MASK_AUTO
+    *                   MWP_PARSER_MASK_GS1
+    *                   MWP_PARSER_MASK_IUID
+    *                   MWP_PARSER_MASK_ISBT
+    *                   MWP_PARSER_MASK_AAMVA
+    *                   MWP_PARSER_MASK_HIBC
+    *
+    */
+   MWBsetActiveParser: function(activeParser) {
+        cordova.exec(function(){}, function(){}, "MWBarcodeScanner", "setActiveParser", [activeParser]);
    }
  
  };
@@ -701,6 +742,31 @@ MWBtoggleZoom: function() {
         'MWB_CODE_MASK_DOTCODE' : {'username':'','key':''}
         }
     }
+               
+   var registerParsers = {
+       'Android' : {
+       'MWP_PARSER_MASK_GS1' : {'username' : '', 'key' : ''},
+       'MWP_PARSER_MASK_IUID' : {'username':'','key':''},
+       'MWP_PARSER_MASK_ISBT' : {'username':'','key':''},
+       'MWP_PARSER_MASK_AAMVA' : {'username':'','key':''},
+       'MWP_PARSER_MASK_HIBC' : {'username':'','key':''}
+       },
+       'iOS' : {
+       'MWP_PARSER_MASK_GS1' : {'username' : '', 'key' : ''},
+       'MWP_PARSER_MASK_IUID' : {'username':'','key':''},
+       'MWP_PARSER_MASK_ISBT' : {'username':'','key':''},
+       'MWP_PARSER_MASK_AAMVA' : {'username':'','key':''},
+       'MWP_PARSER_MASK_HIBC' : {'username':'','key':''}
+       },
+       'Win32NT' : {
+       'MWP_PARSER_MASK_GS1' : {'username' : '','key' : ''},
+       'MWP_PARSER_MASK_IUID' : {'username':'','key':''},
+       'MWP_PARSER_MASK_ISBT' : {'username':'','key':''},
+       'MWP_PARSER_MASK_AAMVA' : {'username':'','key':''},
+       'MWP_PARSER_MASK_HIBC' : {'username':'','key':''}
+       }
+   }
+               
 //    }
 //    catch(e){
 //        console.log(e);
@@ -746,12 +812,19 @@ scanner.scanImage =function(initMWBS,callbackMWBS,imageURI){
                                       console.log('Init function defined in MWBScanner.js invoked');
                                     
                                       var platform = mwregister[dvc.platform];
-                                      
                                       Object.keys(platform).forEach(function(reg_codes){
-                                                                    mwbs['MWBregisterCode'](constants[reg_codes],platform[reg_codes]['username'],platform[reg_codes]['key']);
-                                                                    });
+                                          mwbs['MWBregisterCode'](constants[reg_codes],platform[reg_codes]['username'],platform[reg_codes]['key']);
+                                      });
                                       
-                                      
+                                    var platformParsers = registerParsers[dvc.platform];
+                                   Object.keys(platformParsers).forEach(function(reg_codes){
+                                        mwbs['MWBregisterParser'](constants[reg_codes],platformParsers[reg_codes]['username'],platformParsers[reg_codes]['key']);
+                                   });
+
+
+                                                                    
+                                                                    
+                                                                    
                                       // console.log('JS registration ends: '+ (new Date()).getTime());
                                       // console.log('JS Settings starts: '+ (new Date()).getTime());
                                       //settings portion, disable those that are not needed
@@ -765,6 +838,7 @@ scanner.scanImage =function(initMWBS,callbackMWBS,imageURI){
                                       //  mwbs['MWBsetScanningRect'](constants.MWB_CODE_MASK_39, 20,20,60,60);
                                       //  mwbs['MWBsetMinLength'](constants.MWB_CODE_MASK_39, 4);
                                       //  mwbs['MWBsetParam'](constants.MWB_CODE_MASK_DM, constants.MWB_PAR_ID_RESULT_PREFIX, constants.MWB_PAR_VALUE_RESULT_PREFIX_ALWAYS);
+                                      //  mwbs['MWBsetActiveParser'](constants.MWP_PARSER_MASK_ISBT);
                                       
                                       
                                       // console.log('JS Settings ends: '+ (new Date()).getTime());
@@ -846,11 +920,15 @@ scanner.scanImage =function(initMWBS,callbackMWBS,imageURI){
         
                 /* END registration settings */
                 var platform = mwregister[dvc.platform];
-
                 Object.keys(platform).forEach(function(reg_codes){
                     mwbs['MWBregisterCode'](constants[reg_codes],platform[reg_codes]['username'],platform[reg_codes]['key']);
+                                              
                 });
-
+                                  
+               var platformParsers = registerParsers[dvc.platform];
+               Object.keys(platformParsers).forEach(function(reg_codes){
+                    mwbs['MWBregisterParser'](constants[reg_codes],platformParsers[reg_codes]['username'],platformParsers[reg_codes]['key']);
+               });
 
                 // console.log('JS registration ends: '+ (new Date()).getTime());
                 // console.log('JS Settings starts: '+ (new Date()).getTime());
@@ -878,6 +956,8 @@ scanner.scanImage =function(initMWBS,callbackMWBS,imageURI){
                   //  mwbs['MWBduplicateCodeDelay'](1000);    
                   //  mwbs['MWBuseAutoRect'](false);      
                   //  mwbs['MWBuseFrontCamera'](true);
+                  //  mwbs['MWBsetActiveParser'](constants.MWP_PARSER_MASK_ISBT);
+
 
                                   
 

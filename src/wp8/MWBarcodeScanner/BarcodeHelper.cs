@@ -69,7 +69,8 @@ namespace BarcodeScanners
         {
             public String text;
             public byte[] bytes;
-            public int bytesLength;
+           public byte[] encryptedResult;
+           public int bytesLength;
             public int type;
             public int subtype;
             public int imageWidth;
@@ -184,9 +185,19 @@ namespace BarcodeScanners
                                                         {
                                                             result.bytes[c] = buffer[contentPos + c];
                                                         }
-                                                    }
+                                                     }else if(fieldType == Scanner.MWB_RESULT_FT_PARSER_BYTES)
+                                                         {
+                                                            result.encryptedResult = new byte[fieldContentLength + 1];
+                                                            result.encryptedResult[fieldContentLength] = 0;
+                                                            Buffer.BlockCopy(buffer, contentPos, result.encryptedResult, 0, fieldContentLength);
+                                                        }
 
-                        currentPos += (fieldNameLength + fieldContentLength + 4);
+
+
+
+
+       
+                    currentPos += (fieldNameLength + fieldContentLength + 4);
 
                     }
 
@@ -289,7 +300,7 @@ namespace BarcodeScanners
                     MWBsetScanningRect(Scanner.MWB_CODE_MASK_DOTCODE, RECT_DOTCODE);
                     MWBsetScanningRect(Scanner.MWB_CODE_MASK_11, RECT_FULL_1D);
                     MWBsetScanningRect(Scanner.MWB_CODE_MASK_MSI, RECT_FULL_1D);
-
+                
                 }
 
                 // But for better performance, only activate the symbologies your application requires...

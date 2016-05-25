@@ -93,7 +93,7 @@ namespace BarcodeScannerPage
         public static bool param_EnableFlash = true;
         public static bool param_DefaultFlashOn = false;
         public static bool param_CloseScannerOnDecode = true;
-
+        public static int param_parserMask = Scanner.MWP_PARSER_MASK_NONE;
 
         public static SupportedPageOrientation param_Orientation = SupportedPageOrientation.PortraitOrLandscape;
 
@@ -323,8 +323,6 @@ namespace BarcodeScannerPage
                             }
                         }
 
-
-
                     }
 
 
@@ -461,6 +459,51 @@ namespace BarcodeScannerPage
 				resultDisplayed = true;
                 String typeName = BarcodeHelper.getBarcodeName(mwResult);
 
+
+                byte[] parserResult = new byte[10000];
+                double parserRes = -1;
+                if (param_parserMask != Scanner.MWP_PARSER_MASK_NONE && !(param_parserMask == Scanner.MWP_PARSER_MASK_GS1 && !mwResult.isGS1))
+                {
+
+                    parserRes = Scanner.MWPgetJSON(param_parserMask, mwResult.encryptedResult, parserResult);
+
+                    if (parserRes >= 0)
+                    {
+
+                        mwResult.text = Encoding.UTF8.GetString(parserResult,0,parserResult.Length);
+
+
+                        int index = mwResult.text.IndexOf('\0');
+                        if (index >= 0)
+                            mwResult.text = mwResult.text.Remove(index);
+
+                        if (param_parserMask == Scanner.MWP_PARSER_MASK_AAMVA)
+                        {
+                            typeName = typeName + " (AAMVA)";
+                        }
+                        else if (param_parserMask == Scanner.MWP_PARSER_MASK_IUID)
+                        {
+                            typeName = typeName + " (IUID)";
+                        }
+                        else if (param_parserMask == Scanner.MWP_PARSER_MASK_ISBT)
+                        {
+                            typeName = typeName + " (ISBT)";
+                        }
+                        else if (param_parserMask == Scanner.MWP_PARSER_MASK_HIBC)
+                        {
+                            typeName = typeName + " (HIBC)";
+                        }
+
+                      
+
+                    }
+
+
+
+
+                }
+
+
                 Deployment.Current.Dispatcher.BeginInvoke(delegate()
                 {
                     BarcodeHelper.scannerResult = new ScannerResult();
@@ -576,7 +619,7 @@ namespace BarcodeScannerPage
                     PluginResult pResult = new PluginResult(PluginResult.Status.OK, resultString);
                     pResult.KeepCallback = true;
                     MWBarcodeScanner.mwbScanner.DispatchCommandResult(pResult, MWBarcodeScanner.kallbackID);
-                    if (this.NavigationService.CanGoBack) { 
+                    if (this.NavigationService != null && this.NavigationService.CanGoBack) { 
                         this.NavigationService.GoBack();
                     }
                    return;
@@ -594,6 +637,7 @@ namespace BarcodeScannerPage
                 return;
             }
 
+
             activeThreads++;
 
            // System.Diagnostics.Debug.WriteLine("ActiveThreads: " + activeThreads.ToString());
@@ -605,6 +649,11 @@ namespace BarcodeScannerPage
                 pixels = new byte[len];
             device.GetPreviewBufferY(pixels);
             // Byte[] result = new Byte[10000];
+            if (isClosing)
+            {
+                return;
+            }
+
             int width = (int)device.PreviewResolution.Width;
             int height = (int)device.PreviewResolution.Height;
 

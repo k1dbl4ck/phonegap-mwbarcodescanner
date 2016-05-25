@@ -18,7 +18,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.manateeworks.BarcodeScanner.MWResult;
-import com.manateeworks.camera.CameraManager;
+import com.manateeworks.CameraManager;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
@@ -54,6 +54,7 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
     public static boolean param_closeOnSuccess = true;
     public static boolean param_showLocation = true;
     public static int param_OverlayMode = OM_MW;
+    public static int param_activeParser = MWParser.MWP_PARSER_MASK_NONE;
 
     public static int param_ZoomLevel1 = 0;
     public static int param_ZoomLevel2 = 0;
@@ -419,7 +420,7 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
 
                 byte[] rawResult = null;
                 /*
-				 * if (Global.mode_39) rawResult =
+                 * if (Global.mode_39) rawResult =
 				 * BarcodeScanner.decode39(source, w, h); else rawResult =
 				 * BarcodeScanner.decodeDM(source, w, h);
 				 */
@@ -448,6 +449,7 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
 
                     state = State.STOPPED;
                     BarcodeScanner.MWBsetDuplicate(mwResult.bytes, mwResult.bytesLength);
+
                     MWOverlay.setPaused(true);
 
                     long end = System.currentTimeMillis();
@@ -490,15 +492,33 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
 
         String s = "";
 
-        try {
-            s = new String(rawResult, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        if (param_activeParser != MWParser.MWP_PARSER_MASK_NONE && BarcodeScanner.MWBgetResultType() == BarcodeScanner.MWB_RESULT_TYPE_MW
+                && !(param_activeParser == MWParser.MWP_PARSER_MASK_GS1 && !result.isGS1)) {
 
-            s = "";
-            for (int i = 0; i < rawResult.length; i++)
-                s = s + (char) rawResult[i];
-            e.printStackTrace();
+            s = MWParser.MWPgetJSON(param_activeParser, result.encryptedResult.getBytes());
+            if (s == null) {
+                try {
+                    s = new String(rawResult, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+
+                    s = "";
+                    for (byte aRawResult : rawResult) s = s + (char) aRawResult;
+                    e.printStackTrace();
+                }
+            }
+        } else {
+
+            try {
+                s = new String(rawResult, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+
+                s = "";
+                for (byte aRawResult : rawResult) s = s + (char) aRawResult;
+                e.printStackTrace();
+            }
         }
+
+
 
         int bcType = result.type;
         String typeName = "";
@@ -577,7 +597,7 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
                 break;
         }
 
-        if (result.locationPoints != null && CameraManager.get().getCurrentResolution() != null) {
+        if (result.locationPoints != null && CameraManager.get().getCurrentResolution() != null && ScannerActivity.param_OverlayMode == 1) {
 
             MWOverlay.showLocation(result.locationPoints.points, result.imageWidth, result.imageHeight);
         }

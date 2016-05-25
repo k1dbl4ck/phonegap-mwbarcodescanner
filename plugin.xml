@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="manateeworks-barcodescanner"
-    version="1.8.8">
+    version="1.9.0">
     <name>MWBarcodeScanner</name>
     <description>Manatee Works Barcode Scanner Plugin</description>
     <license>MIT</license>
@@ -46,12 +46,10 @@
      </config-file>
      
      
-     
-     <source-file src="src/android/src/com/manateeworks/BarcodeScanner.java" target-dir="src/com/manateeworks" />
+    <source-file src="src/android/libs/mwbscanner.jar" target-dir="libs" framework="true" />
+
      <source-file src="src/android/src/com/manateeworks/BarcodeScannerPlugin.java" target-dir="src/com/manateeworks" />
      <source-file src="src/android/src/com/manateeworks/ScannerActivity.java" target-dir="src/com/manateeworks" />
-     <source-file src="src/android/src/com/manateeworks/MWOverlay.java" target-dir="src/com/manateeworks" />
-     <source-file src="src/android/src/com/manateeworks/camera/CameraManager.java" target-dir="src/com/manateeworks/camera" />
      
      <source-file src="src/android/res/layout/scanner.xml" target-dir="res/layout" />
      <source-file src="src/android/res/drawable/overlay_mw.png" target-dir="res/drawable" />
@@ -91,7 +89,7 @@
         <header-file src="src/ios/MWBarcodeScanner/MWOverlay.h" target-dir="MWBarcodeScanner"/>
         <source-file src="src/ios/MWBarcodeScanner/MWOverlay.m" target-dir="MWBarcodeScanner"/>
         <header-file src="src/ios/MWBarcodeScanner/MWResult.h" target-dir="MWBarcodeScanner"/>
-        <source-file src="src/ios/MWBarcodeScanner/MWResult.m" target-dir="MWBarcodeScanner"/>
+        <source-file src="src/ios/MWBarcodeScanner/MWParser.h" target-dir="MWBarcodeScanner"/>
         <source-file src="src/ios/MWBarcodeScanner/MWScannerViewController.xib" target-dir="MWBarcodeScanner"/>
         <source-file src="src/ios/MWBarcodeScanner/libBarcodeScanner.a" target-dir="MWBarcodeScanner" framework="true"/>
         

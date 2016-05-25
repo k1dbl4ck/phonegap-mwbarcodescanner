@@ -1,6 +1,6 @@
 Manatee Works Barcode Scanner Plugin
 =========================
- Version 1.8.8
+ Version 1.9
 
 Guide on how to add the Manatee Works Barcode Scanner Phonegap plugin to your project(s)
 
@@ -118,6 +118,23 @@ Guide on how to add the Manatee Works Barcode Scanner Phonegap plugin to your pr
             </ul>
 	   </br>
         
+##Important change in 1.9
+
+New feature: Parsers. Users can now parse the scanned result. 
+    
+     mwbs['MWBsetActiveParser'](constants.MWP_PARSER_MASK_ISBT);
+        Available options:
+               MWP_PARSER_MASK_NONE
+               MWP_PARSER_MASK_AUTO 
+               MWP_PARSER_MASK_GS1 
+               MWP_PARSER_MASK_IUID
+               MWP_PARSER_MASK_ISBT
+               MWP_PARSER_MASK_AAMVA
+               MWP_PARSER_MASK_HIBC
+               
+##Important change in 1.8.8
+
+Support for android app permissions requires using Cordova-Android 5.0.0+. In order to use our plugin on Cordova-Android <5.0.0 consider downgrading to 1.8.7
 
 ##Important change in 1.5
 
@@ -381,6 +398,12 @@ Add a notification plugin (if not already present):
 
 
 * (Optional): You can replace our default overlay_mw.png for the camera screen with your own customized image;
+
+&nbsp;
+###Changes in 1.9:
+&nbsp;
+- Added Parsers: GS1, IUID, ISBT, AAMVA, HIBC
+- Bug fixes
 
 &nbsp;
 ###Changes in 1.8.8:

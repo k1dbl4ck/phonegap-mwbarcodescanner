@@ -56,6 +56,22 @@ typedef unsigned char uint8_t;
 /** @brief  Global decoder flags value: apply rotation on input image
  */
 #define  MWB_CFG_GLOBAL_ROTATE90                        0x04
+#define  MWB_CFG_GLOBAL_ROTATE180                       0x08
+    
+/** @brief  Global decoder flags value: calculate location for 1D barcodeTypes (Code128, Code93, Code39 supported)
+  */
+#define  MWB_CFG_GLOBAL_CALCULATE_1D_LOCATION           0x10
+    
+/** @brief  Global decoder flags value: fail 1D decode if result is not confirmed by location expanding (Code128, Code93, Code39 supported)
+  */
+#define  MWB_CFG_GLOBAL_VEIRIFY_1D_LOCATION             0x20
+    
+/** @brief  Global decoder flags value: fail decode if result is not touching the center of viewfinder (2D + Code128, Code93, Code39 supported)
+ * 1D locaiton flags will be enabled automatically with this one
+  */
+#define  MWB_CFG_GLOBAL_USE_CENTRIC_SCANNING            0x40
+    
+    
     
 
 /** @brief  Code39 decoder flags value: require checksum check
@@ -173,6 +189,15 @@ typedef unsigned char uint8_t;
 #define MWB_SUBC_MASK_C25_ITF14         0x00000004u
 #define MWB_SUBC_MASK_C25_IATA          0x00000008u
 /** @} */
+    
+/**
+ * @name Bit mask identifiers for UPC/EAN decoder types
+ * @{ */
+#define MWB_SUBC_MASK_EANUPC_EAN_13     0x00000001u
+#define MWB_SUBC_MASK_EANUPC_EAN_8      0x00000002u
+#define MWB_SUBC_MASK_EANUPC_UPC_A      0x00000004u
+#define MWB_SUBC_MASK_EANUPC_UPC_E      0x00000008u
+/** @} */
 
 /**
  * @name Bit mask identifiers for 1D scanning direction 
@@ -247,6 +272,14 @@ enum res_types {
 #define MWB_RESULT_FT_IMAGE_HEIGHT          0x00000009u
 #define MWB_RESULT_FT_PARSER_BYTES          0x0000000Au
 
+#define MWB_RESULT_FT_MODULES_COUNT_X       0x0000000Bu
+#define MWB_RESULT_FT_MODULES_COUNT_Y       0x0000000Cu
+#define MWB_RESULT_FT_MODULE_SIZE_X         0x0000000Du
+#define MWB_RESULT_FT_MODULE_SIZE_Y         0x0000000Eu
+#define MWB_RESULT_FT_SKEW                  0x0000000Fu
+    
+    
+
     /** @} */
     
     /**
@@ -262,6 +295,13 @@ enum res_types {
 #define MWB_RESULT_FNAME_IMAGE_WIDTH        "Image Width"
 #define MWB_RESULT_FNAME_IMAGE_HEIGHT       "Image Height"
 #define MWB_RESULT_FNAME_PARSER_BYTES       "Parser Input"
+
+#define MWB_RESULT_FNAME_MODULES_COUNT_X    "Modules Count X"
+#define MWB_RESULT_FNAME_MODULES_COUNT_Y    "Modules Count Y"
+#define MWB_RESULT_FNAME_MODULE_SIZE_X      "Module Size X"
+#define MWB_RESULT_FNAME_MODULE_SIZE_Y      "Module Size Y"
+#define MWB_RESULT_FNAME_SKEW               "Skew"
+
     
     /** @} */
     

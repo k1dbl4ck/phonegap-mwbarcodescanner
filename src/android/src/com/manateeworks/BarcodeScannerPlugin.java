@@ -38,7 +38,7 @@ import android.widget.ScrollView;
 import com.manateeworks.BarcodeScanner.MWResult;
 import com.manateeworks.BarcodeScanner.MWResults;
 import com.manateeworks.ScannerActivity.State;
-import com.manateeworks.camera.CameraManager;
+import com.manateeworks.CameraManager;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaArgs;
@@ -256,13 +256,14 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
             cbc = callbackContext;
             ScannerActivity.cbc = cbc;
 
-            if(cordova.hasPermission(Manifest.permission.CAMERA)){
+            if (cordova.hasPermission(Manifest.permission.CAMERA)) {
                 Context context = this.cordova.getActivity().getApplicationContext();
                 Intent intent = new Intent(context, com.manateeworks.ScannerActivity.class);
                 this.cordova.startActivityForResult(this, intent, 1);
-            }else{
-                cordova.requestPermission(this,234,Manifest.permission.CAMERA);
+            } else {
+                cordova.requestPermission(this, 234, Manifest.permission.CAMERA);
             }
+            MWOverlay.setPaused(false);
             return true;
 
         } else if ("startScannerView".equals(action)) {
@@ -344,6 +345,12 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
         } else if ("registerCode".equals(action)) {
 
             BarcodeScanner.MWBregisterCode(args.getInt(0), args.getString(1), args.getString(2));
+            return true;
+
+        } else if ("registerParser".equals(action)) {
+
+            MWParser.MWPregisterParser(args.getInt(0), args.getString(1), args.getString(2));
+
             return true;
 
         } else if ("setInterfaceOrientation".equals(action)) {
@@ -468,6 +475,12 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
             if (ScannerActivity.activity != null) {
                 ScannerActivity.activity.finish();
             }
+            return true;
+
+        } else if ("setActiveParser".equals(action)) {
+
+            ScannerActivity.param_activeParser = args.getInt(0);
+
             return true;
 
         } else if ("duplicateCodeDelay".equals(action)) {
@@ -1329,13 +1342,30 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
 
         String s = "";
 
-        try {
-            s = new String(rawResult, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        if (ScannerActivity.param_activeParser != MWParser.MWP_PARSER_MASK_NONE && BarcodeScanner.MWBgetResultType() == BarcodeScanner.MWB_RESULT_TYPE_MW
+                && !(ScannerActivity.param_activeParser == MWParser.MWP_PARSER_MASK_GS1 && !result.isGS1)) {
 
-            s = "";
-            for (byte aRawResult : rawResult) s = s + (char) aRawResult;
-            e.printStackTrace();
+            s = MWParser.MWPgetJSON(ScannerActivity.param_activeParser, result.encryptedResult.getBytes());
+            if (s == null) {
+                try {
+                    s = new String(rawResult, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+
+                    s = "";
+                    for (byte aRawResult : rawResult) s = s + (char) aRawResult;
+                    e.printStackTrace();
+                }
+            }
+        } else {
+
+            try {
+                s = new String(rawResult, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+
+                s = "";
+                for (byte aRawResult : rawResult) s = s + (char) aRawResult;
+                e.printStackTrace();
+            }
         }
 
         int bcType = result.type;
@@ -1503,9 +1533,9 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
                 return;
             }
             if (r == PackageManager.PERMISSION_GRANTED) {
-                if (requestCode==123)
+                if (requestCode == 123)
                     startScannerView();
-                else if (requestCode == 234){
+                else if (requestCode == 234) {
                     Context context = this.cordova.getActivity().getApplicationContext();
                     Intent intent = new Intent(context, com.manateeworks.ScannerActivity.class);
                     this.cordova.startActivityForResult(this, intent, 1);
@@ -1520,6 +1550,7 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
     private void startScannerView() {
         if (cordova.hasPermission(Manifest.permission.CAMERA)) {
             if (rlFullScreen == null) {
+                MWOverlay.setPaused(false);
                 rects = null;
                 final ViewGroup viewGroupToAddTo = getMainViewGroup();
                 int w = cordova.getActivity().findViewById(android.R.id.content).getWidth();

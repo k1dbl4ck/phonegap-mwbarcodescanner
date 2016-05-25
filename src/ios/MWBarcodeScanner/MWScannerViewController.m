@@ -6,6 +6,7 @@
 #import "MWScannerViewController.h"
 #import "BarcodeScanner.h"
 #import "MWOverlay.h"
+#include "MWParser.h"
 #include <mach/mach_host.h>
 
 // !!! Rects are in format: x, y, width, height !!!
@@ -18,7 +19,10 @@
 #define RECT_DOTCODE            30, 20, 40, 60
 
 
-UIInterfaceOrientationMask param_Orientation = UIInterfaceOrientationMaskLandscapeLeft;
+
+UIInterfaceOrientationMask param_Orientation = UIInterfaceOrientationMaskPortrait;
+UIInterfaceOrientationMask param_activeParser = MWP_PARSER_MASK_NONE;
+
 BOOL param_EnableHiRes = YES;
 BOOL param_EnableFlash = YES;
 BOOL param_EnableZoom = YES;
@@ -257,7 +261,6 @@ static NSString *DecoderResultNotification = @"DecoderResultNotification";
     
 }
 
-
 + (void) enableZoom: (BOOL) zoom {
     
     param_EnableZoom = zoom;
@@ -272,6 +275,11 @@ static NSString *DecoderResultNotification = @"DecoderResultNotification";
 + (void) use60fps: (BOOL) use {
     param_use60fps = use;
 }
+
++ (void) setActiveParser: (int) parserType {
+    param_activeParser = parserType;
+}
+
 + (void) setMaxThreads: (int) maxThreads {
     
     if (availableThreads == 0){
@@ -1013,6 +1021,70 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             self.state = NORMAL;
             [MWOverlay setPaused:YES];
             
+        
+            if(param_activeParser != MWP_PARSER_MASK_NONE && !(param_activeParser == MWP_PARSER_MASK_GS1 && !mwResult.isGS1)){
+                
+                
+                unsigned char * parserResult = NULL;
+                double parserRes = -1;
+                NSString *parserMask;
+                
+                
+                
+                //USE THIS CODE FOR JSONFORMATTED RESULT
+                
+                parserRes = MWP_getJSON(param_activeParser, mwResult.encryptedResult, mwResult.bytesLength, &parserResult);
+                
+                
+                //use jsonString to get the JSON formatted result
+                if (parserRes >= 0){
+                    mwResult.text = [NSString stringWithCString:parserResult encoding:NSUTF8StringEncoding];
+                }
+                
+                //
+                
+                /*
+                 //USE THIS CODE FOR TEXT FORMATTED RESULT
+                 
+                 parserRes = MWP_getFormattedText(MWPARSER_MASK, obj.result.encryptedResult, obj.result.bytesLength, &parserResult);
+                 if (parserRes >= 0){
+                 decodeResult = [NSString stringWithCString:parserResult encoding:NSUTF8StringEncoding];
+                 }
+                 */
+                //
+                
+                
+                
+                NSLog(@"%f",parserRes);
+                if (parserRes >= 0){
+                    
+                    switch (param_activeParser) {
+                        case MWP_PARSER_MASK_GS1:
+                        parserMask = @"GS1";
+                        break;
+                        case MWP_PARSER_MASK_IUID:
+                        parserMask = @"IUID";
+                        break;
+                        case MWP_PARSER_MASK_ISBT:
+                        parserMask = @"ISBT";
+                        break;
+                        case MWP_PARSER_MASK_AAMVA:
+                        parserMask = @"AAMVA";
+                        break;
+                        case MWP_PARSER_MASK_HIBC:
+                        parserMask = @"HIBC";
+                        break;
+                        default:
+                        parserMask = @"Unknown";
+                        break;
+                    }
+                    
+                    mwResult.typeName = [NSString stringWithFormat:@"%@ (%@)", mwResult.typeName, parserMask];
+                    
+                }
+            }
+        
+            
             NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
             DecoderResult *notificationResult = [DecoderResult createSuccess:mwResult];
             
@@ -1024,13 +1096,11 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                 if (mwResult.locationPoints) {
                     [MWOverlay showLocation:mwResult.locationPoints.points imageWidth:mwResult.imageWidth imageHeight:mwResult.imageHeight];
                 }
-
+                
                 [center postNotificationName:DecoderResultNotification object: notificationResult];
                 NSLog(@"SCANNED RESULT: %@",mwResult.text);
                 
             });
-            
-            
             
         }
         else if (self.state!=NORMAL)

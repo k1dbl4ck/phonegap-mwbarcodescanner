@@ -11,6 +11,7 @@
 #import "MWScannerViewController.h"
 #import <Cordova/CDV.h>
 #import "MWOverlay.h"
+#import "MWParser.h"
 
 @implementation CDVMWBarcodeScanner
 
@@ -420,7 +421,6 @@ NSMutableDictionary *recgtVals;
 
 }
 
-
 - (void) didRotate:(NSNotification *)notification{
 
     if ([self.viewController.view viewWithTag:9158436] && currentOrientation != [[UIApplication sharedApplication]statusBarOrientation] &&[[UIDevice currentDevice]orientation]<=4 && (int)[[UIDevice currentDevice]orientation] == (int)[UIApplication sharedApplication].statusBarOrientation
@@ -469,6 +469,13 @@ NSMutableDictionary *recgtVals;
     char * userName = (char *) [[command.arguments objectAtIndex:1] UTF8String];
     char * key =(char *) [[command.arguments objectAtIndex:2] UTF8String];
     MWB_registerCode(codeMask, userName, key);
+}
+- (void)registerParser:(CDVInvokedUrlCommand*)command
+{
+    int codeMask = [[command.arguments objectAtIndex:0] intValue];
+    char * userName = (char *) [[command.arguments objectAtIndex:1] UTF8String];
+    char * key =(char *) [[command.arguments objectAtIndex:2] UTF8String];
+    MWP_registerParser(codeMask, userName, key);
 }
 
 - (void)setActiveCodes:(CDVInvokedUrlCommand*)command
@@ -621,6 +628,10 @@ NSMutableDictionary *recgtVals;
 - (void)setParam:(CDVInvokedUrlCommand*)command
 {
     MWB_setParam([[command.arguments objectAtIndex:0] intValue], [[command.arguments objectAtIndex:1] intValue], [[command.arguments objectAtIndex:2] intValue]);
+}
+- (void)setActiveParser:(CDVInvokedUrlCommand*)command
+{
+    [MWScannerViewController setActiveParser:[[command.arguments objectAtIndex:0] intValue]];
 }
 - (void)resumeScanning:(CDVInvokedUrlCommand*)command
 {
