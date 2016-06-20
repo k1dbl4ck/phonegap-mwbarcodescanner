@@ -38,7 +38,6 @@ import android.widget.ScrollView;
 import com.manateeworks.BarcodeScanner.MWResult;
 import com.manateeworks.BarcodeScanner.MWResults;
 import com.manateeworks.ScannerActivity.State;
-import com.manateeworks.CameraManager;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaArgs;
@@ -81,7 +80,7 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
     ImageView overlayImage;
     ProgressBar pBar;
     public static boolean useAutoRect = true;
-    public static boolean useFrontCamera = false;
+
     // !!! Rects are in format: x, y, width, height !!!
     public static final Rect RECT_LANDSCAPE_1D = new Rect(2, 20, 96, 60);
     public static final Rect RECT_LANDSCAPE_2D = new Rect(20, 2, 60, 96);
@@ -235,7 +234,7 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
                     });
                 }
             }, 300);
-            CameraManager.get().setCameraDisplayOrientation(0, CameraManager.get().camera,
+            CameraManager.get().setCameraDisplayOrientation(CameraManager.USE_FRONT_CAMERA ? 1 : 0, CameraManager.get().camera,
                     (cordova.getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT));
         }
 
@@ -488,7 +487,7 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
             return true;
 
         } else if ("useFrontCamera".equals(action)) {
-            useFrontCamera = args.getBoolean(0);
+            CameraManager.USE_FRONT_CAMERA = args.getBoolean(0);
             return true;
 
         } else if ("scanImage".equals(action)) {
@@ -692,6 +691,24 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
                 p2y = tmp;
             }
 
+            int[] masks = new int[]{
+                    BarcodeScanner.MWB_CODE_MASK_128,
+                    BarcodeScanner.MWB_CODE_MASK_25,
+                    BarcodeScanner.MWB_CODE_MASK_39,
+                    BarcodeScanner.MWB_CODE_MASK_93,
+                    BarcodeScanner.MWB_CODE_MASK_AZTEC,
+                    BarcodeScanner.MWB_CODE_MASK_DM,
+                    BarcodeScanner.MWB_CODE_MASK_EANUPC,
+                    BarcodeScanner.MWB_CODE_MASK_PDF,
+                    BarcodeScanner.MWB_CODE_MASK_QR,
+                    BarcodeScanner.MWB_CODE_MASK_RSS,
+                    BarcodeScanner.MWB_CODE_MASK_CODABAR,
+                    BarcodeScanner.MWB_CODE_MASK_DOTCODE,
+                    BarcodeScanner.MWB_CODE_MASK_11,
+                    BarcodeScanner.MWB_CODE_MASK_MSI
+            };
+
+
             if (useAutoRect) {
 
                 p1x += 0.02f;
@@ -699,207 +716,42 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
                 p2x -= 0.04f;
                 p2y -= 0.04f;
 
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_25, p1x * 100, p1y * 100, (p2x) * 100, (p2y) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_39, p1x * 100, p1y * 100, (p2x) * 100, (p2y) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_93, p1x * 100, p1y * 100, (p2x) * 100, (p2y) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_128, p1x * 100, p1y * 100, (p2x) * 100, (p2y) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_AZTEC, p1x * 100, p1y * 100, (p2x) * 100, (p2y) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_DM, p1x * 100, p1y * 100, (p2x) * 100, (p2y) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_EANUPC, p1x * 100, p1y * 100, (p2x) * 100, (p2y) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_PDF, p1x * 100, p1y * 100, (p2x) * 100, (p2y) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_QR, p1x * 100, p1y * 100, (p2x) * 100, (p2y) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_RSS, p1x * 100, p1y * 100, (p2x) * 100, (p2y) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_CODABAR, p1x * 100, p1y * 100, (p2x) * 100, (p2y) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_DOTCODE, p1x * 100, p1y * 100, (p2x) * 100, (p2y) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_11, p1x * 100, p1y * 100, (p2x) * 100, (p2y) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_MSI, p1x * 100, p1y * 100, (p2x) * 100, (p2y) * 100);
+                for (int i = 0; i < masks.length; i++) {
+                    BarcodeScanner.MWBsetScanningRect(masks[i], p1x * 100, p1y * 100, (p2x) * 100, (p2y) * 100);
+                }
 
             } else {
 
                 if (rects == null) {
+
                     rects = new ArrayList<RectF>();
-                    rects.add(0, BarcodeScanner.MWBgetScanningRect(BarcodeScanner.MWB_CODE_MASK_128));
-                    rects.add(1, BarcodeScanner.MWBgetScanningRect(BarcodeScanner.MWB_CODE_MASK_25));
-                    rects.add(2, BarcodeScanner.MWBgetScanningRect(BarcodeScanner.MWB_CODE_MASK_39));
-                    rects.add(3, BarcodeScanner.MWBgetScanningRect(BarcodeScanner.MWB_CODE_MASK_93));
-                    rects.add(4, BarcodeScanner.MWBgetScanningRect(BarcodeScanner.MWB_CODE_MASK_AZTEC));
-                    rects.add(5, BarcodeScanner.MWBgetScanningRect(BarcodeScanner.MWB_CODE_MASK_DM));
-                    rects.add(6, BarcodeScanner.MWBgetScanningRect(BarcodeScanner.MWB_CODE_MASK_EANUPC));
-                    rects.add(7, BarcodeScanner.MWBgetScanningRect(BarcodeScanner.MWB_CODE_MASK_PDF));
-                    rects.add(8, BarcodeScanner.MWBgetScanningRect(BarcodeScanner.MWB_CODE_MASK_QR));
-                    rects.add(9, BarcodeScanner.MWBgetScanningRect(BarcodeScanner.MWB_CODE_MASK_RSS));
-                    rects.add(10, BarcodeScanner.MWBgetScanningRect(BarcodeScanner.MWB_CODE_MASK_CODABAR));
-                    rects.add(11, BarcodeScanner.MWBgetScanningRect(BarcodeScanner.MWB_CODE_MASK_DOTCODE));
-                    rects.add(12, BarcodeScanner.MWBgetScanningRect(BarcodeScanner.MWB_CODE_MASK_11));
-                    rects.add(13, BarcodeScanner.MWBgetScanningRect(BarcodeScanner.MWB_CODE_MASK_MSI));
+
+                    for (int i = 0; i < masks.length; i++) {
+                        rects.add(i, BarcodeScanner.MWBgetScanningRect(masks[i]));
+                    }
 
                 } else {
-                    BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_128, rects.get(0).left, rects.get(0).top, rects.get(0).right,
-                            rects.get(0).bottom);
-                    BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_25, rects.get(1).left, rects.get(1).top, rects.get(1).right,
-                            rects.get(1).bottom);
-                    BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_39, rects.get(2).left, rects.get(2).top, rects.get(2).right,
-                            rects.get(2).bottom);
-                    BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_93, rects.get(3).left, rects.get(3).top, rects.get(3).right,
-                            rects.get(3).bottom);
-                    BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_AZTEC, rects.get(4).left, rects.get(4).top, rects.get(4).right,
-                            rects.get(4).bottom);
-                    BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_DM, rects.get(5).left, rects.get(5).top, rects.get(5).right,
-                            rects.get(5).bottom);
-                    BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_EANUPC, rects.get(6).left, rects.get(6).top, rects.get(6).right,
-                            rects.get(6).bottom);
-                    BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_PDF, rects.get(7).left, rects.get(7).top, rects.get(7).right,
-                            rects.get(7).bottom);
-                    BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_QR, rects.get(8).left, rects.get(8).top, rects.get(8).right,
-                            rects.get(8).bottom);
-                    BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_RSS, rects.get(9).left, rects.get(9).top, rects.get(9).right,
-                            rects.get(9).bottom);
-                    BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_CODABAR, rects.get(10).left, rects.get(10).top,
-                            rects.get(10).right, rects.get(10).bottom);
-                    BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_DOTCODE, rects.get(11).left, rects.get(11).top,
-                            rects.get(11).right, rects.get(11).bottom);
-                    BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_11, rects.get(12).left, rects.get(12).top, rects.get(12).right,
-                            rects.get(12).bottom);
-                    BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_MSI, rects.get(13).left, rects.get(13).top, rects.get(13).right,
-                            rects.get(13).bottom);
+
+                    for (int i = 0; i < masks.length; i++) {
+                        BarcodeScanner.MWBsetScanningRect(masks[i], rects.get(i).left, rects.get(i).top, rects.get(i).right,
+                                rects.get(i).bottom);
+
+                    }
                 }
 
-                BarcodeScanner
-                        .MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_128,
-                                (p1x + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_128)[0] / 100)
-                                        * (surfaceView.getWidth() * p2x)) / surfaceView.getWidth()) * 100,
-                                (p1y + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_128)[1] / 100) * (surfaceView.getHeight() * p2y))
-                                        / surfaceView.getHeight()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_128)[2] / 100) * (surfaceView.getWidth() * p2x))
-                                        / surfaceView.getWidth()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_128)[3] / 100) * (surfaceView.getWidth() * p2y))
-                                        / surfaceView.getWidth()) * 100);
-                BarcodeScanner
-                        .MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_25,
-                                (p1x + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_25)[0] / 100)
-                                        * (surfaceView.getWidth() * p2x)) / surfaceView.getWidth()) * 100,
-                                (p1y + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_25)[1] / 100) * (surfaceView.getHeight() * p2y))
-                                        / surfaceView.getHeight()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_25)[2] / 100) * (surfaceView.getWidth() * p2x))
-                                        / surfaceView.getWidth()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_25)[3] / 100) * (surfaceView.getWidth() * p2y))
-                                        / surfaceView.getWidth()) * 100);
-                BarcodeScanner
-                        .MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_39,
-                                (p1x + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_39)[0] / 100)
-                                        * (surfaceView.getWidth() * p2x)) / surfaceView.getWidth()) * 100,
-                                (p1y + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_39)[1] / 100) * (surfaceView.getHeight() * p2y))
-                                        / surfaceView.getHeight()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_39)[2] / 100) * (surfaceView.getWidth() * p2x))
-                                        / surfaceView.getWidth()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_39)[3] / 100) * (surfaceView.getWidth() * p2y))
-                                        / surfaceView.getWidth()) * 100);
-                BarcodeScanner
-                        .MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_93,
-                                (p1x + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_93)[0] / 100)
-                                        * (surfaceView.getWidth() * p2x)) / surfaceView.getWidth()) * 100,
-                                (p1y + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_93)[1] / 100) * (surfaceView.getHeight() * p2y))
-                                        / surfaceView.getHeight()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_93)[2] / 100) * (surfaceView.getWidth() * p2x))
-                                        / surfaceView.getWidth()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_93)[3] / 100) * (surfaceView.getWidth() * p2y))
-                                        / surfaceView.getWidth()) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_AZTEC,
-                        (p1x + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_AZTEC)[0] / 100)
-                                * (surfaceView.getWidth() * p2x)) / surfaceView.getWidth()) * 100,
-                        (p1y + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_AZTEC)[1] / 100)
-                                * (surfaceView.getHeight() * p2y)) / surfaceView.getHeight()) * 100,
-                        (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_AZTEC)[2] / 100) * (surfaceView.getWidth() * p2x))
-                                / surfaceView.getWidth()) * 100,
-                        (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_AZTEC)[3] / 100) * (surfaceView.getWidth() * p2y))
-                                / surfaceView.getWidth()) * 100);
-                BarcodeScanner
-                        .MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_DM,
-                                (p1x + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_DM)[0] / 100)
-                                        * (surfaceView.getWidth() * p2x)) / surfaceView.getWidth()) * 100,
-                                (p1y + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_DM)[1] / 100) * (surfaceView.getHeight() * p2y))
-                                        / surfaceView.getHeight()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_DM)[2] / 100) * (surfaceView.getWidth() * p2x))
-                                        / surfaceView.getWidth()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_DM)[3] / 100) * (surfaceView.getWidth() * p2y))
-                                        / surfaceView.getWidth()) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_EANUPC,
-                        (p1x + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_EANUPC)[0] / 100)
-                                * (surfaceView.getWidth() * p2x)) / surfaceView.getWidth()) * 100,
-                        (p1y + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_EANUPC)[1] / 100)
-                                * (surfaceView.getHeight() * p2y)) / surfaceView.getHeight()) * 100,
-                        (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_EANUPC)[2] / 100) * (surfaceView.getWidth() * p2x))
-                                / surfaceView.getWidth()) * 100,
-                        (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_EANUPC)[3] / 100) * (surfaceView.getWidth() * p2y))
-                                / surfaceView.getWidth()) * 100);
-                BarcodeScanner
-                        .MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_PDF,
-                                (p1x + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_PDF)[0] / 100)
-                                        * (surfaceView.getWidth() * p2x)) / surfaceView.getWidth()) * 100,
-                                (p1y + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_PDF)[1] / 100) * (surfaceView.getHeight() * p2y))
-                                        / surfaceView.getHeight()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_PDF)[2] / 100) * (surfaceView.getWidth() * p2x))
-                                        / surfaceView.getWidth()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_PDF)[3] / 100) * (surfaceView.getWidth() * p2y))
-                                        / surfaceView.getWidth()) * 100);
-                BarcodeScanner
-                        .MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_QR,
-                                (p1x + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_QR)[0] / 100)
-                                        * (surfaceView.getWidth() * p2x)) / surfaceView.getWidth()) * 100,
-                                (p1y + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_QR)[1] / 100) * (surfaceView.getHeight() * p2y))
-                                        / surfaceView.getHeight()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_QR)[2] / 100) * (surfaceView.getWidth() * p2x))
-                                        / surfaceView.getWidth()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_QR)[3] / 100) * (surfaceView.getWidth() * p2y))
-                                        / surfaceView.getWidth()) * 100);
-                BarcodeScanner
-                        .MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_RSS,
-                                (p1x + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_RSS)[0] / 100)
-                                        * (surfaceView.getWidth() * p2x)) / surfaceView.getWidth()) * 100,
-                                (p1y + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_RSS)[1] / 100) * (surfaceView.getHeight() * p2y))
-                                        / surfaceView.getHeight()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_RSS)[2] / 100) * (surfaceView.getWidth() * p2x))
-                                        / surfaceView.getWidth()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_RSS)[3] / 100) * (surfaceView.getWidth() * p2y))
-                                        / surfaceView.getWidth()) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_CODABAR,
-                        (p1x + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_CODABAR)[0] / 100)
-                                * (surfaceView.getWidth() * p2x)) / surfaceView.getWidth()) * 100,
-                        (p1y + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_CODABAR)[1] / 100)
-                                * (surfaceView.getHeight() * p2y)) / surfaceView.getHeight()) * 100,
-                        (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_CODABAR)[2] / 100) * (surfaceView.getWidth() * p2x))
-                                / surfaceView.getWidth()) * 100,
-                        (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_CODABAR)[3] / 100) * (surfaceView.getWidth() * p2y))
-                                / surfaceView.getWidth()) * 100);
-                BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_DOTCODE,
-                        (p1x + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_DOTCODE)[0] / 100)
-                                * (surfaceView.getWidth() * p2x)) / surfaceView.getWidth()) * 100,
-                        (p1y + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_DOTCODE)[1] / 100)
-                                * (surfaceView.getHeight() * p2y)) / surfaceView.getHeight()) * 100,
-                        (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_DOTCODE)[2] / 100) * (surfaceView.getWidth() * p2x))
-                                / surfaceView.getWidth()) * 100,
-                        (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_DOTCODE)[3] / 100) * (surfaceView.getWidth() * p2y))
-                                / surfaceView.getWidth()) * 100);
-                BarcodeScanner
-                        .MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_11,
-                                (p1x + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_11)[0] / 100)
-                                        * (surfaceView.getWidth() * p2x)) / surfaceView.getWidth()) * 100,
-                                (p1y + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_11)[1] / 100) * (surfaceView.getHeight() * p2y))
-                                        / surfaceView.getHeight()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_11)[2] / 100) * (surfaceView.getWidth() * p2x))
-                                        / surfaceView.getWidth()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_11)[3] / 100) * (surfaceView.getWidth() * p2y))
-                                        / surfaceView.getWidth()) * 100);
-                BarcodeScanner
-                        .MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_MSI,
-                                (p1x + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_MSI)[0] / 100)
-                                        * (surfaceView.getWidth() * p2x)) / surfaceView.getWidth()) * 100,
-                                (p1y + ((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_MSI)[1] / 100) * (surfaceView.getHeight() * p2y))
-                                        / surfaceView.getHeight()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_MSI)[2] / 100) * (surfaceView.getWidth() * p2x))
-                                        / surfaceView.getWidth()) * 100,
-                                (((BarcodeScanner.MWBgetScanningRectArray(BarcodeScanner.MWB_CODE_MASK_MSI)[3] / 100) * (surfaceView.getWidth() * p2y))
-                                        / surfaceView.getWidth()) * 100);
+                for (int i = 0; i < masks.length; i++) {
+                    BarcodeScanner
+                            .MWBsetScanningRect(masks[i],
+                                    (p1x + ((BarcodeScanner.MWBgetScanningRectArray(masks[i])[0] / 100)
+                                            * (surfaceView.getWidth() * p2x)) / surfaceView.getWidth()) * 100,
+                                    (p1y + ((BarcodeScanner.MWBgetScanningRectArray(masks[i])[1] / 100) * (surfaceView.getHeight() * p2y))
+                                            / surfaceView.getHeight()) * 100,
+                                    (((BarcodeScanner.MWBgetScanningRectArray(masks[i])[2] / 100) * (surfaceView.getWidth() * p2x))
+                                            / surfaceView.getWidth()) * 100,
+                                    (((BarcodeScanner.MWBgetScanningRectArray(masks[i])[3] / 100) * (surfaceView.getWidth() * p2y))
+                                            / surfaceView.getWidth()) * 100);
+
+                }
 
             }
 

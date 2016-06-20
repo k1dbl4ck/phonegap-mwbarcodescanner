@@ -46,6 +46,7 @@ NSMutableDictionary *recgtVals;
 - (void)startScannerView:(CDVInvokedUrlCommand*)command
 {
     
+    
     if (![self.viewController.view viewWithTag:9158436]) {
         recgtVals = nil;
         
@@ -252,174 +253,67 @@ NSMutableDictionary *recgtVals;
         p2.y = tmp;
     }
     
+    int masks[14] = {
+        MWB_CODE_MASK_25,
+        MWB_CODE_MASK_39,
+        MWB_CODE_MASK_93,
+        MWB_CODE_MASK_128,
+        MWB_CODE_MASK_AZTEC,
+        MWB_CODE_MASK_DM,
+        MWB_CODE_MASK_EANUPC,
+        MWB_CODE_MASK_PDF,
+        MWB_CODE_MASK_QR,
+        MWB_CODE_MASK_RSS,
+        MWB_CODE_MASK_CODABAR,
+        MWB_CODE_MASK_DOTCODE,
+        MWB_CODE_MASK_11,
+        MWB_CODE_MASK_MSI
+    };
+    
+    
     if (useAutoRect) {
-
+        
         p1.x += 0.02;
         p1.y += 0.02;
         p2.x -= 0.02;
         p2.y -= 0.02;
         
-        MWB_setScanningRect(MWB_CODE_MASK_25,     p1.x  *100, p1.y * 100, (p2.x - p1.x) * 100, (p2.y - p1.y) * 100);
-        MWB_setScanningRect(MWB_CODE_MASK_39,     p1.x  *100, p1.y * 100, (p2.x - p1.x) * 100, (p2.y - p1.y) * 100);
-        MWB_setScanningRect(MWB_CODE_MASK_93,     p1.x  *100, p1.y * 100, (p2.x - p1.x) * 100, (p2.y - p1.y) * 100);
-        MWB_setScanningRect(MWB_CODE_MASK_128,    p1.x  *100, p1.y * 100, (p2.x - p1.x) * 100, (p2.y - p1.y) * 100);
-        MWB_setScanningRect(MWB_CODE_MASK_AZTEC,  p1.x  *100, p1.y * 100, (p2.x - p1.x) * 100, (p2.y - p1.y) * 100);
-        MWB_setScanningRect(MWB_CODE_MASK_DM,     p1.x  *100, p1.y * 100, (p2.x - p1.x) * 100, (p2.y - p1.y) * 100);
-        MWB_setScanningRect(MWB_CODE_MASK_EANUPC, p1.x  *100, p1.y * 100, (p2.x - p1.x) * 100, (p2.y - p1.y) * 100);
-        MWB_setScanningRect(MWB_CODE_MASK_PDF,    p1.x  *100, p1.y * 100, (p2.x - p1.x) * 100, (p2.y - p1.y) * 100);
-        MWB_setScanningRect(MWB_CODE_MASK_QR,     p1.x  *100, p1.y * 100, (p2.x - p1.x) * 100, (p2.y - p1.y) * 100);
-        MWB_setScanningRect(MWB_CODE_MASK_RSS,    p1.x  *100, p1.y * 100, (p2.x - p1.x) * 100, (p2.y - p1.y) * 100);
-        MWB_setScanningRect(MWB_CODE_MASK_CODABAR,p1.x  *100, p1.y * 100, (p2.x - p1.x) * 100, (p2.y - p1.y) * 100);
-        MWB_setScanningRect(MWB_CODE_MASK_DOTCODE,p1.x  *100, p1.y * 100, (p2.x - p1.x) * 100, (p2.y - p1.y) * 100);
-        MWB_setScanningRect(MWB_CODE_MASK_11,     p1.x  *100, p1.y * 100, (p2.x - p1.x) * 100, (p2.y - p1.y) * 100);
-        MWB_setScanningRect(MWB_CODE_MASK_MSI,    p1.x  *100, p1.y * 100, (p2.x - p1.x) * 100, (p2.y - p1.y) * 100);
+        for (int i = 0; i<14; i++) {
+            MWB_setScanningRect(masks[i], p1.x  *100, p1.y * 100, (p2.x - p1.x) * 100, (p2.y - p1.y) * 100);
+        }
         
     }else{
         
         if (!recgtVals) {
             recgtVals = [[NSMutableDictionary alloc]init];
-            float left,top,width,height;
-            MWB_getScanningRect(MWB_CODE_MASK_25, &left, &top, &width, &height);
             
-            [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:MWB_CODE_MASK_25]];
-            
-            MWB_getScanningRect(MWB_CODE_MASK_39, &left, &top, &width, &height);
-            [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:MWB_CODE_MASK_39]];
-
-            MWB_getScanningRect(MWB_CODE_MASK_93, &left, &top, &width, &height);
-            [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:MWB_CODE_MASK_93]];
-
-            MWB_getScanningRect(MWB_CODE_MASK_128, &left, &top, &width, &height);
-            [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:MWB_CODE_MASK_128]];
-
-            MWB_getScanningRect(MWB_CODE_MASK_AZTEC, &left, &top, &width, &height);
-            [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:MWB_CODE_MASK_AZTEC]];
-
-            MWB_getScanningRect(MWB_CODE_MASK_DM, &left, &top, &width, &height);
-            [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:MWB_CODE_MASK_DM]];
-
-            MWB_getScanningRect(MWB_CODE_MASK_EANUPC, &left, &top, &width, &height);
-            [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:MWB_CODE_MASK_EANUPC]];
-
-            MWB_getScanningRect(MWB_CODE_MASK_PDF, &left, &top, &width, &height);
-            [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:MWB_CODE_MASK_PDF]];
-
-            MWB_getScanningRect(MWB_CODE_MASK_QR, &left, &top, &width, &height);
-            [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:MWB_CODE_MASK_QR]];
-
-            MWB_getScanningRect(MWB_CODE_MASK_RSS, &left, &top, &width, &height);
-            [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:MWB_CODE_MASK_RSS]];
-
-            MWB_getScanningRect(MWB_CODE_MASK_CODABAR, &left, &top, &width, &height);
-            [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:MWB_CODE_MASK_CODABAR]];
-
-            MWB_getScanningRect(MWB_CODE_MASK_39, &left, &top, &width, &height);
-            [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:MWB_CODE_MASK_25]];
-
-            MWB_getScanningRect(MWB_CODE_MASK_DOTCODE, &left, &top, &width, &height);
-            [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:MWB_CODE_MASK_DOTCODE]];
-
-            MWB_getScanningRect(MWB_CODE_MASK_11, &left, &top, &width, &height);
-            [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:MWB_CODE_MASK_11]];
-
-            MWB_getScanningRect(MWB_CODE_MASK_MSI, &left, &top, &width, &height);
-            [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:MWB_CODE_MASK_MSI]];
-
+            for (int i =0; i<14; i++) {
+                
+                float left,top,width,height;
+                MWB_getScanningRect(masks[i], &left, &top, &width, &height);
+                [recgtVals setObject:[NSArray arrayWithObjects:[NSNumber numberWithInt:left],[NSNumber numberWithInt:top],[NSNumber numberWithInt:width],[NSNumber numberWithInt:height], nil] forKey:[NSNumber numberWithInt:masks[i]]];
+                
+            }
             
         }else{
             
-            NSArray *rectVals = [[NSArray alloc] initWithArray:[recgtVals objectForKey:[NSNumber numberWithInt:MWB_CODE_MASK_25]]];
-            MWB_setScanningRect(MWB_CODE_MASK_25,[[rectVals objectAtIndex:0]intValue], [[rectVals objectAtIndex:1]intValue], [[rectVals objectAtIndex:2]intValue], [[rectVals objectAtIndex:3]intValue]);
-
-            rectVals = [[NSArray alloc] initWithArray:[recgtVals objectForKey:[NSNumber numberWithInt:MWB_CODE_MASK_39]]];
-            MWB_setScanningRect(MWB_CODE_MASK_39,[[rectVals objectAtIndex:0]intValue], [[rectVals objectAtIndex:1]intValue], [[rectVals objectAtIndex:2]intValue], [[rectVals objectAtIndex:3]intValue]);
-            
-            rectVals = [[NSArray alloc] initWithArray:[recgtVals objectForKey:[NSNumber numberWithInt:MWB_CODE_MASK_93]]];
-            MWB_setScanningRect(MWB_CODE_MASK_93,[[rectVals objectAtIndex:0]intValue], [[rectVals objectAtIndex:1]intValue], [[rectVals objectAtIndex:2]intValue], [[rectVals objectAtIndex:3]intValue]);
-            
-            rectVals = [[NSArray alloc] initWithArray:[recgtVals objectForKey:[NSNumber numberWithInt:MWB_CODE_MASK_128]]];
-            MWB_setScanningRect(MWB_CODE_MASK_128,[[rectVals objectAtIndex:0]intValue], [[rectVals objectAtIndex:1]intValue], [[rectVals objectAtIndex:2]intValue], [[rectVals objectAtIndex:3]intValue]);
-            
-            rectVals = [[NSArray alloc] initWithArray:[recgtVals objectForKey:[NSNumber numberWithInt:MWB_CODE_MASK_AZTEC]]];
-            MWB_setScanningRect(MWB_CODE_MASK_AZTEC,[[rectVals objectAtIndex:0]intValue], [[rectVals objectAtIndex:1]intValue], [[rectVals objectAtIndex:2]intValue], [[rectVals objectAtIndex:3]intValue]);
-            
-            rectVals = [[NSArray alloc] initWithArray:[recgtVals objectForKey:[NSNumber numberWithInt:MWB_CODE_MASK_DM]]];
-            MWB_setScanningRect(MWB_CODE_MASK_DM,[[rectVals objectAtIndex:0]intValue], [[rectVals objectAtIndex:1]intValue], [[rectVals objectAtIndex:2]intValue], [[rectVals objectAtIndex:3]intValue]);
-            
-            rectVals = [[NSArray alloc] initWithArray:[recgtVals objectForKey:[NSNumber numberWithInt:MWB_CODE_MASK_EANUPC]]];
-            MWB_setScanningRect(MWB_CODE_MASK_EANUPC,[[rectVals objectAtIndex:0]intValue], [[rectVals objectAtIndex:1]intValue], [[rectVals objectAtIndex:2]intValue], [[rectVals objectAtIndex:3]intValue]);
-            
-            rectVals = [[NSArray alloc] initWithArray:[recgtVals objectForKey:[NSNumber numberWithInt:MWB_CODE_MASK_PDF]]];
-            MWB_setScanningRect(MWB_CODE_MASK_PDF,[[rectVals objectAtIndex:0]intValue], [[rectVals objectAtIndex:1]intValue], [[rectVals objectAtIndex:2]intValue], [[rectVals objectAtIndex:3]intValue]);
-            
-            rectVals = [[NSArray alloc] initWithArray:[recgtVals objectForKey:[NSNumber numberWithInt:MWB_CODE_MASK_QR]]];
-            MWB_setScanningRect(MWB_CODE_MASK_QR,[[rectVals objectAtIndex:0]intValue], [[rectVals objectAtIndex:1]intValue], [[rectVals objectAtIndex:2]intValue], [[rectVals objectAtIndex:3]intValue]);
-            
-            rectVals = [[NSArray alloc] initWithArray:[recgtVals objectForKey:[NSNumber numberWithInt:MWB_CODE_MASK_RSS]]];
-            MWB_setScanningRect(MWB_CODE_MASK_RSS,[[rectVals objectAtIndex:0]intValue], [[rectVals objectAtIndex:1]intValue], [[rectVals objectAtIndex:2]intValue], [[rectVals objectAtIndex:3]intValue]);
-            
-            rectVals = [[NSArray alloc] initWithArray:[recgtVals objectForKey:[NSNumber numberWithInt:MWB_CODE_MASK_CODABAR]]];
-            MWB_setScanningRect(MWB_CODE_MASK_CODABAR,[[rectVals objectAtIndex:0]intValue], [[rectVals objectAtIndex:1]intValue], [[rectVals objectAtIndex:2]intValue], [[rectVals objectAtIndex:3]intValue]);
-            
-            rectVals = [[NSArray alloc] initWithArray:[recgtVals objectForKey:[NSNumber numberWithInt:MWB_CODE_MASK_DOTCODE]]];
-            MWB_setScanningRect(MWB_CODE_MASK_DOTCODE,[[rectVals objectAtIndex:0]intValue], [[rectVals objectAtIndex:1]intValue], [[rectVals objectAtIndex:2]intValue], [[rectVals objectAtIndex:3]intValue]);
-            
-            rectVals = [[NSArray alloc] initWithArray:[recgtVals objectForKey:[NSNumber numberWithInt:MWB_CODE_MASK_11]]];
-            MWB_setScanningRect(MWB_CODE_MASK_11,[[rectVals objectAtIndex:0]intValue], [[rectVals objectAtIndex:1]intValue], [[rectVals objectAtIndex:2]intValue], [[rectVals objectAtIndex:3]intValue]);
-            
-            rectVals = [[NSArray alloc] initWithArray:[recgtVals objectForKey:[NSNumber numberWithInt:MWB_CODE_MASK_MSI]]];
-            MWB_setScanningRect(MWB_CODE_MASK_MSI,[[rectVals objectAtIndex:0]intValue], [[rectVals objectAtIndex:1]intValue], [[rectVals objectAtIndex:2]intValue], [[rectVals objectAtIndex:3]intValue]);
-        }
-        
-        
-        float left,top,width,height;
-        MWB_getScanningRect(MWB_CODE_MASK_128, &left, &top, &width, &height);
-        MWB_setScanningRect(MWB_CODE_MASK_128,    (p1.x+ (1- p1.x*2)*(left/100))  *100, (p1.y+ (1-p1.y*2)*(top/100)) * 100, (p2.x - p1.x) * (width/100) * 100, (p2.y - p1.y)*(height/100) * 100);
-        
-        MWB_getScanningRect(MWB_CODE_MASK_25, &left, &top, &width, &height);
-        MWB_setScanningRect(MWB_CODE_MASK_25,    (p1.x+ (1- p1.x*2)*(left/100))  *100, (p1.y+ (1-p1.y*2)*(top/100)) * 100, (p2.x - p1.x) * (width/100) * 100, (p2.y - p1.y)*(height/100) * 100);
-       
-        MWB_getScanningRect(MWB_CODE_MASK_39, &left, &top, &width, &height);
-        MWB_setScanningRect(MWB_CODE_MASK_39,    (p1.x+ (1- p1.x*2)*(left/100))  *100, (p1.y+ (1-p1.y*2)*(top/100)) * 100, (p2.x - p1.x) * (width/100) * 100, (p2.y - p1.y)*(height/100) * 100);
-       
-        MWB_getScanningRect(MWB_CODE_MASK_93, &left, &top, &width, &height);
-        MWB_setScanningRect(MWB_CODE_MASK_93,    (p1.x+ (1- p1.x*2)*(left/100))  *100, (p1.y+ (1-p1.y*2)*(top/100)) * 100, (p2.x - p1.x) * (width/100) * 100, (p2.y - p1.y)*(height/100) * 100);
-       
-        MWB_getScanningRect(MWB_CODE_MASK_AZTEC, &left, &top, &width, &height);
-        MWB_setScanningRect(MWB_CODE_MASK_AZTEC,    (p1.x+ (1- p1.x*2)*(left/100))  *100, (p1.y+ (1-p1.y*2)*(top/100)) * 100, (p2.x - p1.x) * (width/100) * 100, (p2.y - p1.y)*(height/100) * 100);
-       
-        MWB_getScanningRect(MWB_CODE_MASK_DM, &left, &top, &width, &height);
-        MWB_setScanningRect(MWB_CODE_MASK_DM,    (p1.x+ (1- p1.x*2)*(left/100))  *100, (p1.y+ (1-p1.y*2)*(top/100)) * 100, (p2.x - p1.x) * (width/100) * 100, (p2.y - p1.y)*(height/100) * 100);
-       
-        MWB_getScanningRect(MWB_CODE_MASK_EANUPC, &left, &top, &width, &height);
-        MWB_setScanningRect(MWB_CODE_MASK_EANUPC,    (p1.x+ (1- p1.x*2)*(left/100))  *100, (p1.y+ (1-p1.y*2)*(top/100)) * 100, (p2.x - p1.x) * (width/100) * 100, (p2.y - p1.y)*(height/100) * 100);
-       
-        MWB_getScanningRect(MWB_CODE_MASK_PDF, &left, &top, &width, &height);
-        MWB_setScanningRect(MWB_CODE_MASK_PDF,    (p1.x+ (1- p1.x*2)*(left/100))  *100, (p1.y+ (1-p1.y*2)*(top/100)) * 100, (p2.x - p1.x) * (width/100) * 100, (p2.y - p1.y)*(height/100) * 100);
-       
-        MWB_getScanningRect(MWB_CODE_MASK_QR, &left, &top, &width, &height);
-        MWB_setScanningRect(MWB_CODE_MASK_QR,    (p1.x+ (1- p1.x*2)*(left/100))  *100, (p1.y+ (1-p1.y*2)*(top/100)) * 100, (p2.x - p1.x) * (width/100) * 100, (p2.y - p1.y)*(height/100) * 100);
-       
-        MWB_getScanningRect(MWB_CODE_MASK_RSS, &left, &top, &width, &height);
-        MWB_setScanningRect(MWB_CODE_MASK_RSS,    (p1.x+ (1- p1.x*2)*(left/100))  *100, (p1.y+ (1-p1.y*2)*(top/100)) * 100, (p2.x - p1.x) * (width/100) * 100, (p2.y - p1.y)*(height/100) * 100);
-       
-        MWB_getScanningRect(MWB_CODE_MASK_CODABAR, &left, &top, &width, &height);
-        MWB_setScanningRect(MWB_CODE_MASK_CODABAR,    (p1.x+ (1- p1.x*2)*(left/100))  *100, (p1.y+ (1-p1.y*2)*(top/100)) * 100, (p2.x - p1.x) * (width/100) * 100, (p2.y - p1.y)*(height/100) * 100);
-       
-        MWB_getScanningRect(MWB_CODE_MASK_DOTCODE, &left, &top, &width, &height);
-        MWB_setScanningRect(MWB_CODE_MASK_DOTCODE,    (p1.x+ (1- p1.x*2)*(left/100))  *100, (p1.y+ (1-p1.y*2)*(top/100)) * 100, (p2.x - p1.x) * (width/100) * 100, (p2.y - p1.y)*(height/100) * 100);
-       
-        MWB_getScanningRect(MWB_CODE_MASK_11, &left, &top, &width, &height);
-        MWB_setScanningRect(MWB_CODE_MASK_11,    (p1.x+ (1- p1.x*2)*(left/100))  *100, (p1.y+ (1-p1.y*2)*(top/100)) * 100, (p2.x - p1.x) * (width/100) * 100, (p2.y - p1.y)*(height/100) * 100);
-       
-        MWB_getScanningRect(MWB_CODE_MASK_MSI, &left, &top, &width, &height);
-        MWB_setScanningRect(MWB_CODE_MASK_MSI,    (p1.x+ (1- p1.x*2)*(left/100))  *100, (p1.y+ (1-p1.y*2)*(top/100)) * 100, (p2.x - p1.x) * (width/100) * 100, (p2.y - p1.y)*(height/100) * 100);
-        
+            for (int i = 0 ; i<14; i++) {
                 
+                NSArray *rectVals = [[NSArray alloc] initWithArray:[recgtVals objectForKey:[NSNumber numberWithInt:masks[i]]]];
+                MWB_setScanningRect(masks[i],[[rectVals objectAtIndex:0]intValue], [[rectVals objectAtIndex:1]intValue], [[rectVals objectAtIndex:2]intValue], [[rectVals objectAtIndex:3]intValue]);
+            }
+            
+        }
+        for (int i = 0 ; i<14; i++) {
+            
+            float left,top,width,height;
+            MWB_getScanningRect(masks[i], &left, &top, &width, &height);
+            MWB_setScanningRect(masks[i],    (p1.x+ (1- p1.x*2)*(left/100))  *100, (p1.y+ (1-p1.y*2)*(top/100)) * 100, (p2.x - p1.x) * (width/100) * 100, (p2.y - p1.y)*(height/100) * 100);
+            
+        }
     }
-    
-
 }
+
 
 - (void) didRotate:(NSNotification *)notification{
 

@@ -18,7 +18,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.manateeworks.BarcodeScanner.MWResult;
-import com.manateeworks.CameraManager;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
@@ -84,123 +83,140 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
 
     public static State state = State.STOPPED;
 
+    private static boolean requestingOrientation = false;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         if (param_Orientation != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED) {
             setRequestedOrientation(param_Orientation);
+            int currentOrientation = getResources().getConfiguration().orientation;
+            if (!((param_Orientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE || param_Orientation == ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE)
+                    && currentOrientation == Configuration.ORIENTATION_LANDSCAPE)
+                    && !(param_Orientation == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT && currentOrientation == Configuration.ORIENTATION_PORTRAIT)) {
+                requestingOrientation = true;
+                return;
+            } else {
+                requestingOrientation = false;
+            }
         }
 
+        if (!requestingOrientation) {
+            state = State.STOPPED;
+            package_name = getApplication().getPackageName();
+            resources = getApplication().getResources();
 
-        state = State.STOPPED;
-        package_name = getApplication().getPackageName();
-        resources = getApplication().getResources();
+            setContentView(resources.getIdentifier("scanner", "layout", package_name));
+            activity = this;
 
-        setContentView(resources.getIdentifier("scanner", "layout", package_name));
-        activity = this;
+            overlayImage = (ImageView) findViewById(resources.getIdentifier("overlayImage", "id", package_name));
 
-        overlayImage = (ImageView) findViewById(resources.getIdentifier("overlayImage", "id", package_name));
+            buttonFlash = (ImageButton) findViewById(resources.getIdentifier("flashButton", "id", package_name));
+            if (buttonFlash != null) {
+                buttonFlash.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        toggleFlash();
 
-        buttonFlash = (ImageButton) findViewById(resources.getIdentifier("flashButton", "id", package_name));
-        if (buttonFlash != null) {
-            buttonFlash.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    toggleFlash();
+                    }
+                });
+            }
 
-                }
-            });
+            buttonZoom = (ImageButton) findViewById(resources.getIdentifier("zoomButton", "id", package_name));
+            if (buttonZoom != null) {
+                buttonZoom.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        toggleZoom();
+
+                    }
+                });
+            }
+
+            CameraManager.init(getApplication());
+
         }
-
-        buttonZoom = (ImageButton) findViewById(resources.getIdentifier("zoomButton", "id", package_name));
-        if (buttonZoom != null) {
-            buttonZoom.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    toggleZoom();
-
-                }
-            });
-        }
-
-        CameraManager.init(getApplication());
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        if (!requestingOrientation) {
 
-        if (buttonZoom != null) {
-            buttonZoom.setVisibility(View.GONE);
-        }
-
-        SurfaceView surfaceView = (SurfaceView) findViewById(resources.getIdentifier("preview_view", "id", package_name));
-        SurfaceHolder surfaceHolder = surfaceView.getHolder();
-
-        if ((param_OverlayMode & OM_MW) > 0) {
-            MWOverlay.addOverlay(this, surfaceView);
-        }
-
-        if ((param_OverlayMode & OM_IMAGE) > 0) {
-            if (overlayImage != null) {
-                overlayImage.setVisibility(View.VISIBLE);
+            if (buttonZoom != null) {
+                buttonZoom.setVisibility(View.GONE);
             }
-        } else {
-            if (overlayImage != null) {
-                overlayImage.setVisibility(View.GONE);
+            SurfaceView surfaceView = (SurfaceView) findViewById(resources.getIdentifier("preview_view", "id", package_name));
+            SurfaceHolder surfaceHolder = surfaceView.getHolder();
+
+            if ((param_OverlayMode & OM_MW) > 0) {
+                MWOverlay.addOverlay(this, surfaceView);
             }
-        }
 
-        if (hasSurface) {
-            // The activity was paused but not stopped, so the surface still
-            // exists. Therefore
-            // surfaceCreated() won't be called, so init the camera here.
-            initCamera(surfaceHolder);
-        } else {
-            // Install the callback and wait for surfaceCreated() to init the
-            // camera.
-            surfaceHolder.addCallback(this);
-            surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-        }
-
-        int ver = BarcodeScanner.MWBgetLibVersion();
-        int v1 = (ver >> 16);
-        int v2 = (ver >> 8) & 0xff;
-        int v3 = (ver & 0xff);
-        String libVersion = "Lib version: " + String.valueOf(v1) + "." + String.valueOf(v2) + "." + String.valueOf(v3);
-        // Toast.makeText(this, libVersion, Toast.LENGTH_LONG).show();
-        Log.i("Lib version", libVersion);
-
-        if (param_DefaultFlashOn) {
-
-            new Handler().postDelayed(new Runnable() {
-
-                @Override
-                public void run() {
-                    flashOn = true;
-                    updateFlash();
+            if ((param_OverlayMode & OM_IMAGE) > 0) {
+                if (overlayImage != null) {
+                    overlayImage.setVisibility(View.VISIBLE);
                 }
-            }, 1000);
-        }
 
+            } else {
+                if (overlayImage != null) {
+                    overlayImage.setVisibility(View.GONE);
+                }
+            }
+
+            if (hasSurface) {
+                // The activity was paused but not stopped, so the surface still
+                // exists. Therefore
+                // surfaceCreated() won't be called, so init the camera here.
+                initCamera(surfaceHolder);
+            } else {
+                // Install the callback and wait for surfaceCreated() to init the
+                // camera.
+                surfaceHolder.addCallback(this);
+                surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+            }
+
+            int ver = BarcodeScanner.MWBgetLibVersion();
+            int v1 = (ver >> 16);
+            int v2 = (ver >> 8) & 0xff;
+            int v3 = (ver & 0xff);
+            String libVersion = "Lib version: " + String.valueOf(v1) + "." + String.valueOf(v2) + "." + String.valueOf(v3);
+            // Toast.makeText(this, libVersion, Toast.LENGTH_LONG).show();
+            Log.i("Lib version", libVersion);
+
+            if (param_DefaultFlashOn) {
+
+                new Handler().postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        flashOn = true;
+                        updateFlash();
+                    }
+                }, 1000);
+            }
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        flashOn = false;
-        updateFlash();
-        if ((param_OverlayMode & OM_MW) > 0) {
-            MWOverlay.removeOverlay();
+        if (!requestingOrientation){
+
+            flashOn = false;
+            updateFlash();
+            if ((param_OverlayMode & OM_MW) > 0) {
+                MWOverlay.removeOverlay();
+            }
+            if (handler != null) {
+                CameraManager.get().stopPreview();
+                handler = null;
+            }
+            CameraManager.get().closeDriver();
+            state = State.STOPPED;
         }
-        if (handler != null) {
-            CameraManager.get().stopPreview();
-            handler = null;
-        }
-        CameraManager.get().closeDriver();
-        state = State.STOPPED;
 
     }
 
@@ -281,7 +297,10 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        Log.i("SURFACE", "CHANGED");
         if (!hasSurface) {
+            Log.i("SURFACE", "CHANGED_HAS_SURFACE");
+
             hasSurface = true;
             initCamera(holder);
         }
@@ -462,7 +481,7 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
                     Message message = Message.obtain(handler, MSG_DECODE_SUCCESS, mwResult);
 
 					/*
-					 * Bundle bundle = new Bundle();
+                     * Bundle bundle = new Bundle();
 					 * bundle.putParcelable(DecodeThread.BARCODE_BITMAP,
 					 * CameraManager.get().renderCroppedGreyscaleBitmap(data, w,
 					 * h)); message.setData(bundle);
@@ -517,7 +536,6 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
                 e.printStackTrace();
             }
         }
-
 
 
         int bcType = result.type;
