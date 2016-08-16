@@ -2,7 +2,7 @@
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
     id="manateeworks-barcodescanner"
-    version="1.9.1">
+    version="2.0.0">
     <name>MWBarcodeScanner</name>
     <description>Manatee Works Barcode Scanner Plugin</description>
     <license>MIT</license>
@@ -20,16 +20,17 @@
     
     <!-- android -->
      <platform name="android">
-     
-     
-     
-     
+        
      <config-file target="res/xml/config.xml" parent="/*">
+    
+    <preference name="CrosswalkAnimatable" value="true" />
+
      <feature name="MWBarcodeScanner">
      <param name="android-package" value="com.manateeworks.BarcodeScannerPlugin"/>
      </feature>
      </config-file>
-     
+    
+
      <config-file target="AndroidManifest.xml" parent="/manifest/application">
      
      <activity android:name="com.manateeworks.ScannerActivity"
@@ -42,7 +43,8 @@
      <config-file target="AndroidManifest.xml" parent="/manifest">
      
      <uses-permission android:name="android.permission.CAMERA" />
-     
+     <uses-permission android:name="android.permission.INTERNET" />
+
      </config-file>
      
      
@@ -142,5 +144,5 @@
         
     </platform>
 
-    
+	
 </plugin>

@@ -89,11 +89,7 @@ namespace Cordova.Extension.Commands
             string[] paramsList = JsonHelper.Deserialize<string[]>(options);
             ScannerPage.param_parserMask = Convert.ToInt32(paramsList[0]);
         }
-        public void registerParser(string options)
-        {
-            string[] paramsList = JsonHelper.Deserialize<string[]>(options);
-            Scanner.MWPregisterParser(Convert.ToInt32(paramsList[0]), paramsList[1], paramsList[2]);
-        }
+     
         
         public void setUseAutorect(string options)
         {
@@ -325,10 +321,12 @@ namespace Cordova.Extension.Commands
                 scannerPage.flashButton_Click(null,null);
             }
         }
-        public void registerCode(string options)
+        public void registerSDK(string options)
         {
             string[] paramsList = JsonHelper.Deserialize<string[]>(options);
-            Scanner.MWBregisterCode(Convert.ToInt32(paramsList[0]), paramsList[1], paramsList[2]);
+            int rigistration = Scanner.MWBregisterSDK(Convert.ToString(paramsList[0]));
+            DispatchCommandResult(new PluginResult(PluginResult.Status.OK, Convert.ToString(rigistration)));
+
         }
 
         public void setActiveCodes(string options)

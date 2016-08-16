@@ -40,6 +40,20 @@ typedef unsigned char uint8_t;
 #define MWB_RT_NOT_SUPPORTED        -2
 #define MWB_RT_BAD_PARAM            -3
 /** @} */
+    
+/**
+ * @name Basic return values for RegisterSDK function
+ * @{
+ */
+#define MWB_RTREG_OK                   0
+#define MWB_RTREG_INVALID_KEY         -1
+#define MWB_RTREG_INVALID_CHECKSUM    -2
+#define MWB_RTREG_INVALID_APPLICATION -3
+#define MWB_RTREG_INVALID_SDK_VERSION -4
+#define MWB_RTREG_INVALID_KEY_VERSION -5
+#define MWB_RTREG_INVALID_PLATFORM    -6
+#define MWB_RTREG_KEY_EXPIRED         -7
+/** @} */
 
 /**
  ** @name    Configuration values for use with MWB_setFlags
@@ -372,24 +386,20 @@ extern int MWB_setScanningRect(const uint32_t codeMask, float left, float top, f
 extern int MWB_getScanningRect(const uint32_t codeMask, float *left, float *top, float *width, float *height);
     
     
-
+    
+    
 /**
- * Registers licensing information with single selected decoder type.
- * If registering information is correct, enables full support for selected
- * decoder type.
- * It should be called once per decoder type.
+ * Registers licensing information for all SDK functionality.
+ * It should be called once on app startup.
  *
- * @param[in]   codeMask                Single decoder type selector (MWB_CODE_MASK_...)
- * @param[in]   userName                User name string
  * @param[in]   key                     License key string
- * 
+ *
  * @retval      MWB_RT_OK               Registration successful
- * @retval      MWB_RT_FAIL             Registration failed
- * @retval      MWB_RT_BAD_PARAM        More than one decoder flag selected
- * @retval      MWB_RT_NOT_SUPPORTED    Selected decoder type or its registration
- *                                      is not supported
+ * @retval      < 0                     Error code - see MWB_RTREG values
  */
-extern int MWB_registerCode(const uint32_t codeMask, const char * userName, const char * key);
+extern int MWB_registerSDK(const char * key);
+
+
 
 /**
  * Sets active or inactive status of decoder types and updates decoder execution priority list.

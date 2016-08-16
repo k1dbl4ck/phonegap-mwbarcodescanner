@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -390,6 +391,13 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
                     return false;
                 }
             });
+        }
+
+        //Fix for camera sensor rotation bug
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+        Camera.getCameraInfo(CameraManager.USE_FRONT_CAMERA ? 1 : 0, cameraInfo);
+        if (cameraInfo.orientation == 270) {
+            BarcodeScanner.MWBsetFlags(0, BarcodeScanner.MWB_CFG_GLOBAL_ROTATE180);
         }
 
         startScanning();

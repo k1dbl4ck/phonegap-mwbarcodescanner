@@ -9,98 +9,61 @@ var MWBSInitSpace = MWBSInitSpace || {};
  */
 MWBSInitSpace.init = function(mwbs,constants,dvc){
     console.log('MWBSInitSpace.init Invoked at: '+ (new Date()).getTime());
-    //change these registration settings to match your licence keys
-    /* BEGIN Registration settings */
-
-    //if your app doesn't work after setting license keys, try to uncomment the try-catch, and see what the error is
     
-//    try{
-        var mwregister = {
-           'Android' : {
-                'MWB_CODE_MASK_25' : {'username' : '', 'key' : ''},
-                'MWB_CODE_MASK_39' : {'username':'','key':''},
-                'MWB_CODE_MASK_93' : {'username':'','key':''},
-                'MWB_CODE_MASK_128' : {'username':'','key':''},
-                'MWB_CODE_MASK_AZTEC' : {'username':'','key':''},
-                'MWB_CODE_MASK_DM' : {'username':'','key':''},
-                'MWB_CODE_MASK_PDF' : {'username':'','key':''},
-                'MWB_CODE_MASK_QR' : {'username':'','key':''},
-                'MWB_CODE_MASK_RSS' : {'username':'','key':''},
-                'MWB_CODE_MASK_CODABAR' : {'username':'','key':''},
-                'MWB_CODE_MASK_11' : {'username':'','key':''},
-                'MWB_CODE_MASK_MSI' : {'username':'','key':''},
-                'MWB_CODE_MASK_DOTCODE' : {'username':'','key':''}
-                },
-            'iOS' :{
-                'MWB_CODE_MASK_25' : {'username' : '', 'key' : ''},
-                'MWB_CODE_MASK_39' : {'username':'','key':''},
-                'MWB_CODE_MASK_93' : {'username':'','key':''},
-                'MWB_CODE_MASK_128' : {'username':'','key':''},
-                'MWB_CODE_MASK_AZTEC' : {'username':'','key':''},
-                'MWB_CODE_MASK_DM' : {'username':'','key':''},
-                'MWB_CODE_MASK_PDF' : {'username':'','key':''},
-                'MWB_CODE_MASK_QR' : {'username':'','key':''},
-                'MWB_CODE_MASK_RSS' : {'username':'','key':''},
-                'MWB_CODE_MASK_CODABAR' : {'username':'','key':''},
-                'MWB_CODE_MASK_11' : {'username':'','key':''},
-                'MWB_CODE_MASK_MSI' : {'username':'','key':''},
-                'MWB_CODE_MASK_DOTCODE' : {'username':'','key':''}
-                },
-            'Win32NT' : {
-                'MWB_CODE_MASK_25' : {'username' : '', 'key' : ''},
-                'MWB_CODE_MASK_39' : {'username':'','key':''},
-                'MWB_CODE_MASK_93' : {'username':'','key':''},
-                'MWB_CODE_MASK_128' : {'username':'','key':''},
-                'MWB_CODE_MASK_AZTEC' : {'username':'','key':''},
-                'MWB_CODE_MASK_DM' : {'username':'','key':''},
-                'MWB_CODE_MASK_PDF' : {'username':'','key':''},
-                'MWB_CODE_MASK_QR' : {'username':'','key':''},
-                'MWB_CODE_MASK_RSS' : {'username':'','key':''},
-                'MWB_CODE_MASK_CODABAR' : {'username':'','key':''},
-                'MWB_CODE_MASK_11' : {'username':'','key':''},
-                'MWB_CODE_MASK_MSI' : {'username':'','key':''},
-                'MWB_CODE_MASK_DOTCODE' : {'username':'','key':''}
-                }
+    //change these registration settings to match your licence keys
+
+    var ANDROID_KEY = 'androidKEY';
+    var IOS_KEY     = 'iosKEY';
+    var Win32NT_KEY = 'win8KEY';
+
+     var registrationCallback = function(registrationResult){
+
+     switch(parseInt(registrationResult)) {
+            case constants.MWB_RTREG_OK :
+            console.log('Registration OK');
+                break;
+            case constants.MWB_RTREG_INVALID_KEY :
+            console.log('Registration Invalid Key');
+                break;
+            case constants.MWB_RTREG_INVALID_CHECKSUM :
+            console.log('Registration Invalid Checksum');
+                break;
+            case constants.MWB_RTREG_INVALID_APPLICATION :
+            console.log('Registration Invalid Application');
+                break;
+            case constants.MWB_RTREG_INVALID_SDK_VERSION :
+            console.log('Registration Invalid SDK Version');
+                break;
+            case constants.MWB_RTREG_INVALID_KEY_VERSION :
+            console.log('Registration Invalid Key Version');
+                break;
+            case constants.MWB_RTREG_INVALID_PLATFORM :
+            console.log('Registration Invalid Platform');
+                break;
+            case constants.MWB_RTREG_KEY_EXPIRED :
+            console.log('Registration Key Expired');
+                break;
+            default:
+            console.log('Registration Unknown Error');
+                break;
         }
 
-        var registerParsers = {
-             'Android' : {
-                 'MWP_PARSER_MASK_GS1' : {'username' : '', 'key' : ''},
-                 'MWP_PARSER_MASK_IUID' : {'username':'','key':''},
-                 'MWP_PARSER_MASK_ISBT' : {'username':'','key':''},
-                 'MWP_PARSER_MASK_AAMVA' : {'username':'','key':''},
-                 'MWP_PARSER_MASK_HIBC' : {'username':'','key':''}
-             },
-             'iOS' : {
-                 'MWP_PARSER_MASK_GS1' : {'username' : '', 'key' : ''},
-                 'MWP_PARSER_MASK_IUID' : {'username':'','key':''},
-                 'MWP_PARSER_MASK_ISBT' : {'username':'','key':''},
-                 'MWP_PARSER_MASK_AAMVA' : {'username':'','key':''},
-                 'MWP_PARSER_MASK_HIBC' : {'username':'','key':''}
-             },
-             'Win32NT' : {
-                 'MWP_PARSER_MASK_GS1' : {'username' : '','key' : ''},
-                 'MWP_PARSER_MASK_IUID' : {'username':'','key':''},
-                 'MWP_PARSER_MASK_ISBT' : {'username':'','key':''},
-                 'MWP_PARSER_MASK_AAMVA' : {'username':'','key':''},
-                 'MWP_PARSER_MASK_HIBC' : {'username':'','key':''}
-             }
-         }
-//    }
-//    catch(e){
-//        console.log(e);
-//    }
-    /* END registration settings */
-    var platform = mwregister[dvc.platform];
-    Object.keys(platform).forEach(function(reg_codes){
-        mwbs['MWBregisterCode'](constants[reg_codes],platform[reg_codes]['username'],platform[reg_codes]['key']);
-    });
-    
-     var platformParsers = registerParsers[dvc.platform];
-     Object.keys(platformParsers).forEach(function(reg_codes){
-          mwbs['MWBregisterParser'](constants[reg_codes],platformParsers[reg_codes]['username'],platformParsers[reg_codes]['key']);
-     });
+    };
 
+          switch(dvc.platform) {
+              case 'Android':
+               mwbs['MWBregisterSDK'](ANDROID_KEY, registrationCallback);
+                  break;
+              case 'iOS':
+              mwbs['MWBregisterSDK'](IOS_KEY, registrationCallback);
+                  break;
+              case 'Win32NT':
+              mwbs['MWBregisterSDK'](Win32NT_KEY, registrationCallback);
+                  break;
+              default:
+                  break;
+
+          }
 
  
 

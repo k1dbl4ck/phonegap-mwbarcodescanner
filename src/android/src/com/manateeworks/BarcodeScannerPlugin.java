@@ -10,10 +10,12 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.hardware.Camera;
 import android.os.Handler;
 import android.os.Message;
 import android.util.TypedValue;
@@ -341,15 +343,10 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
             BarcodeScanner.MWBsetScanningRect(args.getInt(0), args.getInt(1), args.getInt(2), args.getInt(3), args.getInt(4));
             return true;
 
-        } else if ("registerCode".equals(action)) {
+        } else if ("registerSDK".equals(action)) {
 
-            BarcodeScanner.MWBregisterCode(args.getInt(0), args.getString(1), args.getString(2));
-            return true;
-
-        } else if ("registerParser".equals(action)) {
-
-            MWParser.MWPregisterParser(args.getInt(0), args.getString(1), args.getString(2));
-
+            int registrationResult = BarcodeScanner.MWBregisterSDK(args.getString(0), cordova.getActivity());
+            callbackContext.success(String.valueOf(registrationResult));
             return true;
 
         } else if ("setInterfaceOrientation".equals(action)) {
@@ -877,68 +874,12 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
 
     public static void initDecoder() {
 
-        // //You should perform registering calls from MWBScanner.js!
-
-		/*
-         * BarcodeScanner.MWBregisterCode(BarcodeScanner.MWB_CODE_MASK_25,
-		 * "username", "key");
-		 * BarcodeScanner.MWBregisterCode(BarcodeScanner.MWB_CODE_MASK_39,
-		 * "username", "key");
-		 * BarcodeScanner.MWBregisterCode(BarcodeScanner.MWB_CODE_MASK_93,
-		 * "username", "key");
-		 * BarcodeScanner.MWBregisterCode(BarcodeScanner.MWB_CODE_MASK_128,
-		 * "username", "key");
-		 * BarcodeScanner.MWBregisterCode(BarcodeScanner.MWB_CODE_MASK_AZTEC,
-		 * "username", "key");
-		 * BarcodeScanner.MWBregisterCode(BarcodeScanner.MWB_CODE_MASK_DM,
-		 * "username", "key");
-		 * BarcodeScanner.MWBregisterCode(BarcodeScanner.MWB_CODE_MASK_EANUPC,
-		 * "username", "key");
-		 * BarcodeScanner.MWBregisterCode(BarcodeScanner.MWB_CODE_MASK_PDF,
-		 * "username", "key");
-		 * BarcodeScanner.MWBregisterCode(BarcodeScanner.MWB_CODE_MASK_QR,
-		 * "username", "key");
-		 * BarcodeScanner.MWBregisterCode(BarcodeScanner.MWB_CODE_MASK_RSS,
-		 * "username", "key");
-		 * BarcodeScanner.MWBregisterCode(BarcodeScanner.MWB_CODE_MASK_CODABAR
-		 * ,"username", "key");
-		 * BarcodeScanner.MWBregisterCode(BarcodeScanner.MWB_CODE_MASK_DOTCODE
-		 * ,"username", "key");
-		 * BarcodeScanner.MWBregisterCode(BarcodeScanner.MWB_CODE_MASK_11,
-		 * "username", "key");
-		 * BarcodeScanner.MWBregisterCode(BarcodeScanner.MWB_CODE_MASK_MSI,
-		 * "username", "key");
-		 */
-        // choose code type or types you want to search for
-
-        // Our sample app is configured by default to search all supported
-        // barcodes...
         BarcodeScanner.MWBsetActiveCodes(
                 BarcodeScanner.MWB_CODE_MASK_25 | BarcodeScanner.MWB_CODE_MASK_39 | BarcodeScanner.MWB_CODE_MASK_93 | BarcodeScanner.MWB_CODE_MASK_128
                         | BarcodeScanner.MWB_CODE_MASK_AZTEC | BarcodeScanner.MWB_CODE_MASK_DM | BarcodeScanner.MWB_CODE_MASK_EANUPC
                         | BarcodeScanner.MWB_CODE_MASK_PDF | BarcodeScanner.MWB_CODE_MASK_QR | BarcodeScanner.MWB_CODE_MASK_CODABAR
                         | BarcodeScanner.MWB_CODE_MASK_11 | BarcodeScanner.MWB_CODE_MASK_MSI | BarcodeScanner.MWB_CODE_MASK_RSS);
 
-        // But for better performance, only activate the symbologies your
-        // application requires...
-        // BarcodeScanner.MWBsetActiveCodes( BarcodeScanner.MWB_CODE_MASK_25 );
-        // BarcodeScanner.MWBsetActiveCodes( BarcodeScanner.MWB_CODE_MASK_39 );
-        // BarcodeScanner.MWBsetActiveCodes( BarcodeScanner.MWB_CODE_MASK_93 );
-        // BarcodeScanner.MWBsetActiveCodes( BarcodeScanner.MWB_CODE_MASK_128 );
-        // BarcodeScanner.MWBsetActiveCodes( BarcodeScanner.MWB_CODE_MASK_AZTEC
-        // );
-        // BarcodeScanner.MWBsetActiveCodes( BarcodeScanner.MWB_CODE_MASK_DM );
-        // BarcodeScanner.MWBsetActiveCodes( BarcodeScanner.MWB_CODE_MASK_EANUPC
-        // );
-        // BarcodeScanner.MWBsetActiveCodes( BarcodeScanner.MWB_CODE_MASK_PDF );
-        // BarcodeScanner.MWBsetActiveCodes( BarcodeScanner.MWB_CODE_MASK_QR );
-        // BarcodeScanner.MWBsetActiveCodes( BarcodeScanner.MWB_CODE_MASK_RSS );
-        // BarcodeScanner.MWBsetActiveCodes(
-        // BarcodeScanner.MWB_CODE_MASK_CODABAR );
-        // BarcodeScanner.MWBsetActiveCodes(
-        // BarcodeScanner.MWB_CODE_MASK_DOTCODE );
-        // BarcodeScanner.MWBsetActiveCodes( BarcodeScanner.MWB_CODE_MASK_11 );
-        // BarcodeScanner.MWBsetActiveCodes( BarcodeScanner.MWB_CODE_MASK_MSI );
 
         // Our sample app is configured by default to search both directions...
         BarcodeScanner.MWBsetDirection(BarcodeScanner.MWB_SCANDIRECTION_HORIZONTAL | BarcodeScanner.MWB_SCANDIRECTION_VERTICAL);
@@ -958,69 +899,6 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
         BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_DOTCODE, RECT_DOTCODE);
         BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_11, RECT_FULL_1D);
         BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_MSI, RECT_FULL_1D);
-
-        // But for better performance, set like this for PORTRAIT scanning...
-        // BarcodeScanner.MWBsetDirection(BarcodeScanner.MWB_SCANDIRECTION_VERTICAL);
-        // set the scanning rectangle based on scan direction(format in pct: x,
-        // y, width, height)
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_25,
-        // RECT_PORTRAIT_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_39,
-        // RECT_PORTRAIT_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_93,
-        // RECT_PORTRAIT_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_128,
-        // RECT_PORTRAIT_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_AZTEC,
-        // RECT_PORTRAIT_2D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_DM,
-        // RECT_PORTRAIT_2D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_EANUPC,
-        // RECT_PORTRAIT_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_PDF,
-        // RECT_PORTRAIT_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_QR,
-        // RECT_PORTRAIT_2D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_RSS,
-        // RECT_PORTRAIT_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_CODABAR,RECT_PORTRAIT_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_DOTCODE,RECT_DOTCODE);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_11,
-        // RECT_PORTRAIT_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_MSI,
-        // RECT_PORTRAIT_1D);
-
-        // or like this for LANDSCAPE scanning - Preferred for dense or wide
-        // codes...
-        // BarcodeScanner.MWBsetDirection(BarcodeScanner.MWB_SCANDIRECTION_HORIZONTAL);
-        // set the scanning rectangle based on scan direction(format in pct: x,
-        // y, width, height)
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_25,
-        // RECT_LANDSCAPE_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_39,
-        // RECT_LANDSCAPE_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_93,
-        // RECT_LANDSCAPE_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_128,
-        // RECT_LANDSCAPE_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_AZTEC,
-        // RECT_LANDSCAPE_2D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_DM,
-        // RECT_LANDSCAPE_2D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_EANUPC,
-        // RECT_LANDSCAPE_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_PDF,
-        // RECT_LANDSCAPE_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_QR,
-        // RECT_LANDSCAPE_2D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_RSS,
-        // RECT_LANDSCAPE_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_CODABAR,RECT_LANDSCAPE_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_DOTCODE,RECT_DOTCODE);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_11,
-        // RECT_LANDSCAPE_1D);
-        // BarcodeScanner.MWBsetScanningRect(BarcodeScanner.MWB_CODE_MASK_MSI,
-        // RECT_LANDSCAPE_1D);
 
         // Set minimum result length for low-protected barcode types
 
@@ -1170,6 +1048,13 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
                     return false;
                 }
             });
+        }
+
+        //Fix for camera sensor rotation bug
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+        Camera.getCameraInfo(CameraManager.USE_FRONT_CAMERA ? 1 : 0, cameraInfo);
+        if (cameraInfo.orientation == 270) {
+            BarcodeScanner.MWBsetFlags(0, BarcodeScanner.MWB_CFG_GLOBAL_ROTATE180);
         }
 
         CameraManager.get().startPreview();
@@ -1481,7 +1366,7 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
                             flashButton.setImageResource(cordova.getActivity().getResources().getIdentifier("flashbuttonoff", "drawable", cordova.getActivity().getApplication().getPackageName()));
                             flashButton.setScaleType(ScaleType.FIT_XY);
                             flashButton.setPadding(padding, padding, padding, padding);
-                            flashButton.setBackground(null);
+                            flashButton.setBackgroundColor(Color.TRANSPARENT);
                             if (flashButton != null) {
                                 flashButton.setOnClickListener(new View.OnClickListener() {
                                     @Override
@@ -1511,7 +1396,7 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
                             zoomButton.setImageResource(cordova.getActivity().getResources().getIdentifier("zoom", "drawable", cordova.getActivity().getApplication().getPackageName()));
 
                             zoomButton.setScaleType(ScaleType.FIT_XY);
-                            zoomButton.setBackground(null);
+                            zoomButton.setBackgroundColor(Color.TRANSPARENT);
                             if (zoomButton != null) {
                                 zoomButton.setOnClickListener(new View.OnClickListener() {
                                     @Override

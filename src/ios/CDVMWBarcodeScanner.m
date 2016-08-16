@@ -357,20 +357,17 @@ NSMutableDictionary *recgtVals;
     }
     
 }
-- (void)registerCode:(CDVInvokedUrlCommand*)command
+
+- (void)registerSDK:(CDVInvokedUrlCommand*)command
 {
-    int codeMask = [[command.arguments objectAtIndex:0] intValue];
-    char * userName = (char *) [[command.arguments objectAtIndex:1] UTF8String];
-    char * key =(char *) [[command.arguments objectAtIndex:2] UTF8String];
-    MWB_registerCode(codeMask, userName, key);
+    char * key = (char *) [[command.arguments objectAtIndex:0] UTF8String];
+    int registrationResult = MWB_registerSDK(key);
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[NSString stringWithFormat:@"%d",registrationResult]];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+
 }
-- (void)registerParser:(CDVInvokedUrlCommand*)command
-{
-    int codeMask = [[command.arguments objectAtIndex:0] intValue];
-    char * userName = (char *) [[command.arguments objectAtIndex:1] UTF8String];
-    char * key =(char *) [[command.arguments objectAtIndex:2] UTF8String];
-    MWP_registerParser(codeMask, userName, key);
-}
+
+
 
 - (void)setActiveCodes:(CDVInvokedUrlCommand*)command
 {

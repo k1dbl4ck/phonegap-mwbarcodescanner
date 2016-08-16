@@ -1,4 +1,15 @@
 /*
+    Version 2.0
+
+    - Decoding library updated to 3.0
+    - The registration functions have been revamped. License credentials issued prior to version 3.0 will no longer work with this and future releases.
+    - UPC/EAN decoder options now support a flag to disable add-on scanning
+    - Barcode location support has been implemented for 1D barcodes (Codabar, Code 25, Code 39, Code 93, Code 128, EAN & UPC) - not enabled by default, can be activated by using mwbs['MWBsetFlags'](0, constants.MWB_CFG_GLOBAL_CALCULATE_1D_LOCATION);
+    - PDF417 decoding has improved damage resistance making it easier to scan damaged codes
+    - Greatly improved the recognition of dotted Data Matrix 
+    - Rectangular Data Matrix codes with DMRE extension now supported
+    - Better recognition of Code 39 stop pattern
+    - Other bugfixes and performance improvements
     Version 1.9
    
     - Parsers
@@ -141,7 +152,7 @@
      MWB_RT_OK :                     0,
      MWB_RT_FAIL :                  -1,
      MWB_RT_NOT_SUPPORTED :         -2,
-     MWB_RT_BAD_PARAM :               -3,
+     MWB_RT_BAD_PARAM :             -3,
      
      
      
@@ -228,6 +239,15 @@
      /** @brief  Global decoder flags value: apply rotation on input image
         */
      MWB_CFG_GLOBAL_ROTATE90 :                       0x04,
+
+    
+     /** @brief  Global decoder flags value: calculate location for 1D barcodeTypes (Code128, Code93, Code39 supported)
+      */
+     MWB_CFG_GLOBAL_CALCULATE_1D_LOCATION   :  0x10,
+        
+    /** @brief  Global decoder flags value: fail 1D decode if result is not confirmed by location expanding (Code128, Code93, Code39 supported)
+      */
+     MWB_CFG_GLOBAL_VEIRIFY_1D_LOCATION    :   0x20,
      
      /**
         * @name Bit mask identifiers for supported decoder types
@@ -238,10 +258,10 @@
      MWB_CODE_MASK_RSS :              0x00000004,
      MWB_CODE_MASK_39 :               0x00000008,
      MWB_CODE_MASK_EANUPC :           0x00000010,
-     MWB_CODE_MASK_128 :             0x00000020,
-     MWB_CODE_MASK_PDF :             0x00000040,
-     MWB_CODE_MASK_AZTEC :             0x00000080,
-     MWB_CODE_MASK_25 :            0x00000100,
+     MWB_CODE_MASK_128 :              0x00000020,
+     MWB_CODE_MASK_PDF :              0x00000040,
+     MWB_CODE_MASK_AZTEC :            0x00000080,
+     MWB_CODE_MASK_25 :               0x00000100,
      MWB_CODE_MASK_93 :               0x00000200,
      MWB_CODE_MASK_CODABAR :          0x00000400,
      MWB_CODE_MASK_DOTCODE :          0x00000800,
@@ -249,8 +269,21 @@
      MWB_CODE_MASK_MSI :              0x00002000,
      MWB_CODE_MASK_ALL :              0xffffffff,
      /** @} */
-     
-     
+
+/**
+ * @name Basic return values for RegisterSDK function
+ * @{
+ */
+     MWB_RTREG_OK                  : 0,
+     MWB_RTREG_INVALID_KEY         : -1,
+     MWB_RTREG_INVALID_CHECKSUM    : -2,
+     MWB_RTREG_INVALID_APPLICATION : -3,
+     MWB_RTREG_INVALID_SDK_VERSION : -4,
+     MWB_RTREG_INVALID_KEY_VERSION : -5,
+     MWB_RTREG_INVALID_PLATFORM    : -6,
+     MWB_RTREG_KEY_EXPIRED         : -7,
+/** @} */
+
      /**
         * @name Bit mask identifiers for RSS decoder types
         * @{ */
@@ -332,6 +365,8 @@
                MWP_PARSER_MASK_AUTO :               0x0fffffff
 
 /** @} */
+
+
  };
  
  
@@ -369,31 +404,17 @@
  },
  
  /**
-    * Registers licensing information with single selected decoder type.
-    * If registering information is correct, enables full support for selected
-    * decoder type.
-    * It should be called once per decoder type.
-    *
-    * @param[in]   codeMask                Single decoder type selector (MWB_CODE_MASK_...)
-    * @param[in]   userName                User name string
-    * @param[in]   key                     License key string
-    *
-    * @retval      MWB_RT_OK               Registration successful
-    * @retval      MWB_RT_FAIL             Registration failed
-    * @retval      MWB_RT_BAD_PARAM        More than one decoder flag selected
-    * @retval      MWB_RT_NOT_SUPPORTED    Selected decoder type or its registration
-    *                                      is not supported
-    */
- MWBregisterCode: function(codeMask, userName, key) {
-    cordova.exec(function(){}, function(){}, "MWBarcodeScanner", "registerCode", [codeMask, userName, key]);
- },
-
-               
-               
-    MWBregisterParser: function(codeMask, userName, key) {
-    cordova.exec(function(){}, function(){}, "MWBarcodeScanner", "registerParser", [codeMask, userName, key]);
+  * Registers licensing information for all SDK functionality.
+  * It should be called once on app startup.
+  *
+  * @param[in]   key                     License key string
+  * @param[in]   callback                Result callback
+  *
+  */
+    MWBregisterSDK: function(key, callback) {
+       cordova.exec(callback, function(){}, "MWBarcodeScanner", "registerSDK", [key]);
     },
- 
+
  /**
     * Sets active or inactive status of decoder types
     *
@@ -690,89 +711,7 @@ MWBtoggleZoom: function() {
  
  };
  
-//change these registration settings to match your licence keys
-/* BEGIN Registration settings */
-//if your app doesn't work after setting license keys, try to uncomment the try-catch, and see what the error is
-
-//    try{
-    var mwregister = {
-    'Android' : {
-        'MWB_CODE_MASK_25' : {'username' : '', 'key' : ''},
-        'MWB_CODE_MASK_39' : {'username':'','key':''},
-        'MWB_CODE_MASK_93' : {'username':'','key':''},
-        'MWB_CODE_MASK_128' : {'username':'','key':''},
-        'MWB_CODE_MASK_AZTEC' : {'username':'','key':''},
-        'MWB_CODE_MASK_DM' : {'username':'','key':''},
-        'MWB_CODE_MASK_PDF' : {'username':'','key':''},
-        'MWB_CODE_MASK_QR' : {'username':'','key':''},
-        'MWB_CODE_MASK_RSS' : {'username':'','key':''},
-        'MWB_CODE_MASK_CODABAR' : {'username':'','key':''},
-        'MWB_CODE_MASK_11' : {'username':'','key':''},
-        'MWB_CODE_MASK_MSI' : {'username':'','key':''},
-        'MWB_CODE_MASK_DOTCODE' : {'username':'','key':''}
-        },
-    'iOS' :{
-        'MWB_CODE_MASK_25' : {'username' : '', 'key' : ''},
-        'MWB_CODE_MASK_39' : {'username':'','key':''},
-        'MWB_CODE_MASK_93' : {'username':'','key':''},
-        'MWB_CODE_MASK_128' : {'username':'','key':''},
-        'MWB_CODE_MASK_AZTEC' : {'username':'','key':''},
-        'MWB_CODE_MASK_DM' : {'username':'','key':''},
-        'MWB_CODE_MASK_PDF' : {'username':'','key':''},
-        'MWB_CODE_MASK_QR' : {'username':'','key':''},
-        'MWB_CODE_MASK_RSS' : {'username':'','key':''},
-        'MWB_CODE_MASK_CODABAR' : {'username':'','key':''},
-        'MWB_CODE_MASK_11' : {'username':'','key':''},
-        'MWB_CODE_MASK_MSI' : {'username':'','key':''},
-        'MWB_CODE_MASK_DOTCODE' : {'username':'','key':''}
-        },
-    'Win32NT' : {
-        'MWB_CODE_MASK_25' : {'username' : '', 'key' : ''},
-        'MWB_CODE_MASK_39' : {'username':'','key':''},
-        'MWB_CODE_MASK_93' : {'username':'','key':''},
-        'MWB_CODE_MASK_128' : {'username':'','key':''},
-        'MWB_CODE_MASK_AZTEC' : {'username':'','key':''},
-        'MWB_CODE_MASK_DM' : {'username':'','key':''},
-        'MWB_CODE_MASK_PDF' : {'username':'','key':''},
-        'MWB_CODE_MASK_QR' : {'username':'','key':''},
-        'MWB_CODE_MASK_RSS' : {'username':'','key':''},
-        'MWB_CODE_MASK_CODABAR' : {'username':'','key':''},
-        'MWB_CODE_MASK_11' : {'username':'','key':''},
-        'MWB_CODE_MASK_MSI' : {'username':'','key':''},
-        'MWB_CODE_MASK_DOTCODE' : {'username':'','key':''}
-        }
-    }
-               
-   var registerParsers = {
-       'Android' : {
-       'MWP_PARSER_MASK_GS1' : {'username' : '', 'key' : ''},
-       'MWP_PARSER_MASK_IUID' : {'username':'','key':''},
-       'MWP_PARSER_MASK_ISBT' : {'username':'','key':''},
-       'MWP_PARSER_MASK_AAMVA' : {'username':'','key':''},
-       'MWP_PARSER_MASK_HIBC' : {'username':'','key':''}
-       },
-       'iOS' : {
-       'MWP_PARSER_MASK_GS1' : {'username' : '', 'key' : ''},
-       'MWP_PARSER_MASK_IUID' : {'username':'','key':''},
-       'MWP_PARSER_MASK_ISBT' : {'username':'','key':''},
-       'MWP_PARSER_MASK_AAMVA' : {'username':'','key':''},
-       'MWP_PARSER_MASK_HIBC' : {'username':'','key':''}
-       },
-       'Win32NT' : {
-       'MWP_PARSER_MASK_GS1' : {'username' : '','key' : ''},
-       'MWP_PARSER_MASK_IUID' : {'username':'','key':''},
-       'MWP_PARSER_MASK_ISBT' : {'username':'','key':''},
-       'MWP_PARSER_MASK_AAMVA' : {'username':'','key':''},
-       'MWP_PARSER_MASK_HIBC' : {'username':'','key':''}
-       }
-   }
-               
-//    }
-//    catch(e){
-//        console.log(e);
-//    }
-/* END registration settings */
- scanner = {};
+scanner = {};
 
 scanner.closeScanner = function(){
     BarcodeScanner.MWBcloseScanner();
@@ -790,7 +729,15 @@ scanner.resumeScanning = function(){
     BarcodeScanner.MWBresumeScanning();
 }
 
-scanner.scanImage =function(initMWBS,callbackMWBS,imageURI){
+
+    //change these registration settings to match your licence keys
+
+    var ANDROID_KEY = 'androidKEY';
+    var IOS_KEY     = 'iosKEY';
+    var Win32NT_KEY = 'win8KEY';
+
+
+scanner.scanImage = function(initMWBS,callbackMWBS,imageURI){
 
 
                                     var args = Array.prototype.slice.call(arguments);
@@ -810,20 +757,58 @@ scanner.scanImage =function(initMWBS,callbackMWBS,imageURI){
                                       var initFunc = (typeof initMWBS === 'function')?initMWBS:function(mwbs,constants,dvc){
                                       
                                       console.log('Init function defined in MWBScanner.js invoked');
-                                    
-                                      var platform = mwregister[dvc.platform];
-                                      Object.keys(platform).forEach(function(reg_codes){
-                                          mwbs['MWBregisterCode'](constants[reg_codes],platform[reg_codes]['username'],platform[reg_codes]['key']);
-                                      });
-                                      
-                                    var platformParsers = registerParsers[dvc.platform];
-                                   Object.keys(platformParsers).forEach(function(reg_codes){
-                                        mwbs['MWBregisterParser'](constants[reg_codes],platformParsers[reg_codes]['username'],platformParsers[reg_codes]['key']);
-                                   });
+
+                                        var registrationCallback = function(registrationResult){
+
+                                             switch(parseInt(registrationResult)) {
+                                                    case constants.MWB_RTREG_OK :
+                                                    console.log('Registration OK');
+                                                        break;
+                                                    case constants.MWB_RTREG_INVALID_KEY :
+                                                    console.log('Registration Invalid Key');
+                                                        break;
+                                                    case constants.MWB_RTREG_INVALID_CHECKSUM :
+                                                    console.log('Registration Invalid Checksum');
+                                                        break;
+                                                    case constants.MWB_RTREG_INVALID_APPLICATION :
+                                                    console.log('Registration Invalid Application');
+                                                        break;
+                                                    case constants.MWB_RTREG_INVALID_SDK_VERSION :
+                                                    console.log('Registration Invalid SDK Version');
+                                                        break;
+                                                    case constants.MWB_RTREG_INVALID_KEY_VERSION :
+                                                    console.log('Registration Invalid Key Version');
+                                                        break;
+                                                    case constants.MWB_RTREG_INVALID_PLATFORM :
+                                                    console.log('Registration Invalid Platform');
+                                                        break;
+                                                    case constants.MWB_RTREG_KEY_EXPIRED :
+                                                    console.log('Registration Key Expired');
+                                                        break;
+                                                    default:
+                                                    console.log('Registration Unknown Error');
+                                                        break;
+                                                }
+
+                                            };
+
+                                    switch(dvc.platform) {
+                                        case 'Android':
+                                         mwbs['MWBregisterSDK'](ANDROID_KEY, registrationCallback);
+                                            break;
+                                        case 'iOS':
+                                        mwbs['MWBregisterSDK'](IOS_KEY, registrationCallback);
+                                            break;
+                                        case 'Win32NT':
+                                        mwbs['MWBregisterSDK'](Win32NT_KEY, registrationCallback);
+                                            break;
+                                        default:
+                                            break;
+
+                                    }
 
 
-                                                                    
-                                                                    
+
                                                                     
                                       // console.log('JS registration ends: '+ (new Date()).getTime());
                                       // console.log('JS Settings starts: '+ (new Date()).getTime());
@@ -917,18 +902,56 @@ scanner.scanImage =function(initMWBS,callbackMWBS,imageURI){
         var initFunc = (typeof initMWBS === 'function')?initMWBS:function(mwbs,constants,dvc){
 
                 console.log('Init function defined in MWBScanner.js invoked');
-        
-                /* END registration settings */
-                var platform = mwregister[dvc.platform];
-                Object.keys(platform).forEach(function(reg_codes){
-                    mwbs['MWBregisterCode'](constants[reg_codes],platform[reg_codes]['username'],platform[reg_codes]['key']);
-                                              
-                });
-                                  
-               var platformParsers = registerParsers[dvc.platform];
-               Object.keys(platformParsers).forEach(function(reg_codes){
-                    mwbs['MWBregisterParser'](constants[reg_codes],platformParsers[reg_codes]['username'],platformParsers[reg_codes]['key']);
-               });
+
+                var registrationCallback = function(registrationResult){
+
+                 switch(parseInt(registrationResult)) {
+                        case constants.MWB_RTREG_OK :
+                        console.log('Registration OK');
+                            break;
+                        case constants.MWB_RTREG_INVALID_KEY :
+                        console.log('Registration Invalid Key');
+                            break;
+                        case constants.MWB_RTREG_INVALID_CHECKSUM :
+                        console.log('Registration Invalid Checksum');
+                            break;
+                        case constants.MWB_RTREG_INVALID_APPLICATION :
+                        console.log('Registration Invalid Application');
+                            break;
+                        case constants.MWB_RTREG_INVALID_SDK_VERSION :
+                        console.log('Registration Invalid SDK Version');
+                            break;
+                        case constants.MWB_RTREG_INVALID_KEY_VERSION :
+                        console.log('Registration Invalid Key Version');
+                            break;
+                        case constants.MWB_RTREG_INVALID_PLATFORM :
+                        console.log('Registration Invalid Platform');
+                            break;
+                        case constants.MWB_RTREG_KEY_EXPIRED :
+                        console.log('Registration Key Expired');
+                            break;
+                        default:
+                        console.log('Registration Unknown Error');
+                            break;
+                    }
+
+                };
+
+
+                switch(dvc.platform) {
+                     case 'Android':
+                     mwbs['MWBregisterSDK'](ANDROID_KEY, registrationCallback);
+                         break;
+                     case 'iOS':
+                     mwbs['MWBregisterSDK'](IOS_KEY, registrationCallback);
+                         break;
+                     case 'Win32NT':
+                     mwbs['MWBregisterSDK'](Win32NT_KEY, registrationCallback);
+                         break;
+                     default:
+                         break;
+                 }
+
 
                 // console.log('JS registration ends: '+ (new Date()).getTime());
                 // console.log('JS Settings starts: '+ (new Date()).getTime());

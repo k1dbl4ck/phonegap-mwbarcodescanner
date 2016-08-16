@@ -1,6 +1,6 @@
 Manatee Works Barcode Scanner Plugin
 =========================
- Version 1.9.1
+ Version 2.0
 
 Guide on how to add the Manatee Works Barcode Scanner Phonegap plugin to your project(s)
 
@@ -118,6 +118,12 @@ Guide on how to add the Manatee Works Barcode Scanner Phonegap plugin to your pr
             </ul>
 	   </br>
         
+        
+##Important change in 2.0
+        
+* The registration call functions have been completely revamped. License credentials issued prior to v. 3.0 will no longer work with the new and future releases.
+
+
 ##Important change in 1.9
 
 New feature: Parsers. Users can now parse the scanned result. 
@@ -398,6 +404,19 @@ Add a notification plugin (if not already present):
 
 
 * (Optional): You can replace our default overlay_mw.png for the camera screen with your own customized image;
+
+&nbsp;
+###Changes in 2.0:
+&nbsp;
+- Decoding library updated to 3.0
+- The registration functions have been revamped. License credentials issued prior to version 3.0 will no longer work with this and future releases.
+- UPC/EAN decoder options now support a flag to disable add-on scanning
+- Barcode location support has been implemented for 1D barcodes (Codabar, Code 25, Code 39, Code 93, Code 128, EAN & UPC) - not enabled by default, can be activated by using mwbs['MWBsetFlags'](0, constants.MWB_CFG_GLOBAL_CALCULATE_1D_LOCATION);
+- PDF417 decoding has improved damage resistance making it easier to scan damaged codes
+- Greatly improved the recognition of dotted Data Matrix 
+- Rectangular Data Matrix codes with DMRE extension now supported
+- Better recognition of Code 39 stop pattern
+- Other bugfixes and performance improvements
 
 &nbsp;
 ###Changes in 1.9:

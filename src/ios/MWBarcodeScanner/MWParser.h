@@ -70,6 +70,8 @@ extern "C" {
 #define UID_ERROR_MISSING_REQ       -21
 #define UID_ERROR_INVALID_IAC       -22
 #define UID_ERROR_INVALID_TEI       -23
+#define UID_ERROR_NOT_ENOUGHT_MEMORY          -24
+
 
 //UID PARSER WARNING CODES
 #define UID_WARN_EXTRA_CHARS        91      //characters after EOT
@@ -80,13 +82,15 @@ extern "C" {
 
 
 //AAMVA PARSER ERROR CODES
-#define NOT_ENOUGHT_MEMORY 	                   -1
+#define AAMVA_ERROR_INVALID_FORMAT             -1
 #define AAMVA_ERROR_INVALID_HEADER    	       -2
+#define AAMVA_ERROR_INVALID_IIN      	       -3
+#define NOT_ENOUGHT_MEMORY                     -4
 
 //AAMVA PARSER WARNING CODES
-#define AAMVA_WARNING_MISSING_MANDATORY_FIELDS 100
+#define AAMVA_WARNING_MISSING_MANDATORY_FIELDS  1
 
-    
+
 /**
  * Returns version code of Parser Library.
  *
