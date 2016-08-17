@@ -1,10 +1,10 @@
-Manatee Works Barcode Scanner Plugin
+Manatee Works Barcode Scanner SDK Plugin
 =========================
  Version 2.0
 
-Guide on how to add the Manatee Works Barcode Scanner Phonegap plugin to your project(s)
+Guide on how to add the Manatee Works Barcode Scanner SDK PhoneGap plugin to your project(s)
 
-*For more in-depth info, visit our website at [www.manateeworks.com](http://manateeworks.com/)*
+*For more in-depth info, visit our website at [www.manateeworks.com](https://manateeworks.com/)*
 
 
 ##Install using CLI interface (Phonegap 3.0 and above)
