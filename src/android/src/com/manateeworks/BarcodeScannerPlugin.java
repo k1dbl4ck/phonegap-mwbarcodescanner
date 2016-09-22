@@ -19,6 +19,7 @@ import android.hardware.Camera;
 import android.os.Handler;
 import android.os.Message;
 import android.util.TypedValue;
+import android.util.Log; 
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -56,10 +57,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.List; 
+
+
 
 public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder.Callback {
 
     private boolean hasSurface;
+    private static final String TAG = "BarcodeScannerPlugin";
+
 
     public static class ImageInfo {
         byte[] pixels;
@@ -100,6 +106,7 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
     public static double yP;
     private ImageButton flashButton;
     private ImageButton zoomButton;
+    private ImageButton focusButton;
 
 
     @Override
@@ -253,6 +260,7 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
 
         } else if ("startScanner".equals(action)) {
 
+            Log.d(TAG, "START SCANNER"); 
             stopScanner();
             cbc = callbackContext;
             ScannerActivity.cbc = cbc;
@@ -268,16 +276,27 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
             return true;
 
         } else if ("startScannerView".equals(action)) {
+
+            Log.d(TAG, "START SCANNER VIEW"); 
+
             if (rlFullScreen == null) {
+
+                            Log.d(TAG, "FULLSCREEN IS NULL"); 
+
                 cbc = callbackContext;
                 xP = args.getDouble(0);
                 yP = args.getDouble(1);
                 widthP = args.getDouble(2);
                 heightP = args.getDouble(3);
 
+                Log.d(TAG, "FULLSCREEN IS NULL x = " + xP +" / y = "+yP+" / w = "+widthP+" / h = "+heightP ); 
+
                 startScannerView();
 
             } else {
+
+                                            Log.d(TAG, "FULLSCREEN IS NOT NULL"); 
+
                 setAutoRect();
             }
             return true;
@@ -638,29 +657,6 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
 
         }
         return false;
-    }
-
-    private void updateFlash() {
-
-        if (flashButton != null) {
-            if (!CameraManager.get().isTorchAvailable()) {
-                flashButton.setVisibility(View.GONE);
-                return;
-
-            }
-
-
-            if (ScannerActivity.flashOn) {
-                flashButton.setImageResource(cordova.getActivity().getResources().getIdentifier("flashbuttonon", "drawable", cordova.getActivity().getApplication().getPackageName()));
-            } else {
-                flashButton.setImageResource(cordova.getActivity().getResources().getIdentifier("flashbuttonoff", "drawable", cordova.getActivity().getApplication().getPackageName()));
-            }
-
-            CameraManager.get().setTorch(ScannerActivity.flashOn);
-
-            flashButton.postInvalidate();
-        }
-
     }
 
     public void setAutoRect() {
@@ -1026,7 +1022,7 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
                     switch (msg.what) {
                         case ScannerActivity.MSG_AUTOFOCUS:
                             if (ScannerActivity.state == State.PREVIEW || ScannerActivity.state == State.DECODING) {
-                                CameraManager.get().requestAutoFocus(ScannerActivity.handler, ScannerActivity.MSG_AUTOFOCUS);
+                              //  CameraManager.get().requestAutoFocus(ScannerActivity.handler, ScannerActivity.MSG_AUTOFOCUS);
                             }
                             break;
                         case ScannerActivity.MSG_DECODE:
@@ -1060,7 +1056,7 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
         CameraManager.get().startPreview();
         ScannerActivity.state = State.PREVIEW;
         CameraManager.get().requestPreviewFrame(ScannerActivity.handler, ScannerActivity.MSG_DECODE);
-        CameraManager.get().requestAutoFocus(ScannerActivity.handler, ScannerActivity.MSG_AUTOFOCUS);
+      //  CameraManager.get().requestAutoFocus(ScannerActivity.handler, ScannerActivity.MSG_AUTOFOCUS);
         scrollView.setVisibility(View.VISIBLE);
         pBar.setVisibility(View.GONE);
         // flashOn = false;
@@ -1259,6 +1255,157 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
         updateFlash();
     }
 
+
+    private void updateFlash() {
+
+        if (flashButton != null) {
+            if (!CameraManager.get().isTorchAvailable()) {
+                flashButton.setVisibility(View.GONE);
+                return;
+
+            }
+
+
+            if (ScannerActivity.flashOn) {
+                flashButton.setImageResource(cordova.getActivity().getResources().getIdentifier("flashbuttonon", "drawable", cordova.getActivity().getApplication().getPackageName()));
+            } else {
+                flashButton.setImageResource(cordova.getActivity().getResources().getIdentifier("flashbuttonoff", "drawable", cordova.getActivity().getApplication().getPackageName()));
+            }
+
+            CameraManager.get().setTorch(ScannerActivity.flashOn);
+
+            flashButton.postInvalidate();
+        }
+
+    }
+
+
+      private void toggleFocus() {
+
+
+         ScannerActivity.focusOn = !ScannerActivity.focusOn;
+         updateFocus(); 
+
+  
+    }
+
+
+    private void updateFocus() {
+
+        if (focusButton != null) {
+
+            Log.d(TAG, "TOGGLING FOCUS ON : "+ScannerActivity.focusOn); 
+
+        
+
+            if (ScannerActivity.focusOn) {
+
+
+                Log.d(TAG, "TOGGLING FOCUS TO AUTO"); 
+
+
+                focusButton.setImageResource(cordova.getActivity().getResources().getIdentifier("autofocuson", "drawable", cordova.getActivity().getApplication().getPackageName()));            
+                CameraManager cm = CameraManager.get(); 
+                Camera.Parameters mParams = cm.camera.getParameters(); 
+
+                Boolean foundFocusAbility = false; 
+
+                List<String> focusModes = mParams.getSupportedFocusModes();
+                if (focusModes.contains(Camera.Parameters.FOCUS_MODE_EDOF)) 
+                 {  
+                     Log.d(TAG, "CAMERA FOCUS SETTING -> FOCUS_MODE_EDOF "); 
+                     mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_EDOF);
+                     foundFocusAbility = true; 
+                
+                }                                       
+                else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO))
+                 {  
+                     Log.d(TAG, "CAMERA FOCUS SETTING -> FOCUS_MODE_AUTO "); 
+                     mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+                     foundFocusAbility = true; 
+                 }
+                 else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) 
+                 {  
+                     Log.d(TAG, "CAMERA FOCUS SETTING -> FOCUS_MODE_CONTINUOUS_PICTURE "); 
+                     mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                     foundFocusAbility = true; 
+                 
+                 }
+             
+  
+
+
+
+                if(foundFocusAbility) { cm.camera.setParameters(mParams); } 
+
+              
+
+
+            
+            } else {
+
+                 
+                 
+
+
+                  Log.d(TAG, "TOGGLING FOCUS TO FIXED"); 
+
+                focusButton.setImageResource(cordova.getActivity().getResources().getIdentifier("autofocusoff", "drawable", cordova.getActivity().getApplication().getPackageName()));
+                CameraManager cm = CameraManager.get(); 
+
+             
+
+                Camera.Parameters mParams = cm.camera.getParameters(); 
+
+                                    //GET THE default
+                String currFocusMode = mParams.getFocusMode(); 
+                 Log.d(TAG, "CAMERA CURRENT FOCUS MODE IS : "+currFocusMode); 
+
+
+
+                Boolean foundFocusAbility = false; 
+
+
+                  List<String> focusModes = mParams.getSupportedFocusModes();
+             
+              
+                if (focusModes.contains(Camera.Parameters.FOCUS_MODE_FIXED)) 
+                {  
+                    Log.d(TAG, "CAMERA FOCUS SETTING -> FOCUS_MODE_FIXED "); 
+                    mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_FIXED);
+                    foundFocusAbility = true;
+
+                }   
+                else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_MACRO)) 
+                { 
+                     Log.d(TAG, "CAMERA FOCUS SETTING -> FOCUS_MODE_MACRO ");
+                     mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);
+                     foundFocusAbility = true; 
+                           
+                }   
+                else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_INFINITY)) 
+                { 
+                     Log.d(TAG, "CAMERA FOCUS SETTING -> FOCUS_MODE_INFINITY "); 
+                     mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_INFINITY);
+                     foundFocusAbility = true;
+                     
+                }
+               
+
+
+                if(foundFocusAbility) { cm.camera.setParameters(mParams); } 
+
+            }
+
+
+            focusButton.postInvalidate();
+        }
+
+    }
+
+
+  
+
     public void onRequestPermissionResult(int requestCode, String[] permissions,
                                           int[] grantResults) throws JSONException {
         for (int r : grantResults) {
@@ -1379,6 +1526,35 @@ public class BarcodeScannerPlugin extends CordovaPlugin implements SurfaceHolder
 
                             rlSurfaceContainer.addView(flashButton, flashParams);
                             rlSurfaceContainer.bringChildToFront(flashButton);
+                        }
+
+                         if (ScannerActivity.param_EnableFocus) {
+                            int widthHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 64, cordova.getActivity().getResources().getDisplayMetrics());
+                            int marginDP = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6, cordova.getActivity().getResources().getDisplayMetrics());
+                            int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, cordova.getActivity().getResources().getDisplayMetrics());
+
+                            focusButton = new ImageButton(cordova.getActivity());
+                            LayoutParams focusParams = new LayoutParams(widthHeight, widthHeight);
+                            focusParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+                            focusParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+                            focusParams.topMargin = (int) ((heightTmp - height) / 2) + marginDP;
+                            focusParams.rightMargin = (int) ((widthTmp - width) / 2) + marginDP + 110;
+                            focusButton.setImageResource(cordova.getActivity().getResources().getIdentifier("autofocuson", "drawable", cordova.getActivity().getApplication().getPackageName()));
+                            focusButton.setScaleType(ScaleType.FIT_XY);
+                            focusButton.setPadding(padding, padding, padding, padding);
+                            focusButton.setBackgroundColor(Color.TRANSPARENT);
+                            if (focusButton != null) {
+                                focusButton.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        toggleFocus();
+
+                                    }
+                                });
+                            }
+
+                            rlSurfaceContainer.addView(focusButton, focusParams);
+                            rlSurfaceContainer.bringChildToFront(focusButton);
                         }
 
                         if (ScannerActivity.param_EnableZoom) {

@@ -49,6 +49,8 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
     public static int param_Orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
     public static boolean param_EnableHiRes = true;
     public static boolean param_EnableFlash = true;
+    public static boolean param_EnableFocus = true;
+    
     public static boolean param_EnableZoom = true;
     public static boolean param_DefaultFlashOn = false;
     public static boolean param_closeOnSuccess = true;
@@ -66,11 +68,13 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
     private ImageView overlayImage;
     private ImageButton buttonFlash;
     private ImageButton buttonZoom;
+    private ImageButton buttonFocus;
 
     private String package_name;
     private Resources resources;
 
     static boolean flashOn = false;
+    static boolean focusOn = true;
 
     public static HashMap<String, Object> customParams;
 
@@ -134,6 +138,18 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
                     }
                 });
             }
+
+            buttonFocus = (ImageButton) findViewById(resources.getIdentifier("focusButton", "id", package_name));
+            if (buttonFocus != null) {
+                buttonFocus.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        toggleFocus();
+
+                    }
+                });
+            }
+
 
             CameraManager.init(getApplication());
 
@@ -236,7 +252,77 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
         updateZoom();
     }
 
-    public static void updateZoom() {
+      public void toggleFocus() {
+
+
+         focusOn = !focusOn;
+         updateFocus(); 
+
+  
+    }
+
+
+    public void updateFocus() {
+
+        if (buttonFocus != null) {
+           
+
+            if (ScannerActivity.focusOn) {
+
+                buttonFocus.setImageResource(resources.getIdentifier("autofocuson", "drawable", package_name));
+                CameraManager cm = CameraManager.get(); 
+                Camera.Parameters mParams = cm.camera.getParameters(); 
+                mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_FIXED);
+                cm.camera.setParameters(mParams);
+
+
+
+            
+            } else {
+                buttonFocus.setImageResource(resources.getIdentifier("autofocusoff", "drawable", package_name));
+
+                
+             
+               // Camera.Parameters mParams = CameraManager.camera.getParameters(); 
+               // mParams.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+               // CameraManager.camera.setParameters(mParams);
+            }
+
+
+            buttonFocus.postInvalidate();
+        }
+
+    }
+
+
+
+
+
+    private void updateFlash() {
+
+        if (buttonFlash != null) {
+            if (!CameraManager.get().isTorchAvailable() || !param_EnableFlash) {
+                buttonFlash.setVisibility(View.GONE);
+                return;
+
+            } else {
+                buttonFlash.setVisibility(View.VISIBLE);
+            }
+
+            if (flashOn) {
+                buttonFlash.setImageResource(resources.getIdentifier("flashbuttonon", "drawable", package_name));
+            } else {
+                buttonFlash.setImageResource(resources.getIdentifier("flashbuttonoff", "drawable", package_name));
+            }
+
+            CameraManager.get().setTorch(flashOn);
+
+            buttonFlash.postInvalidate();
+        }
+
+    }
+
+        public static void updateZoom() {
 
         if (param_ZoomLevel1 == 0 || param_ZoomLevel2 == 0) {
             firstZoom = 150;
@@ -270,30 +356,6 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
             default:
                 break;
         }
-    }
-
-    private void updateFlash() {
-
-        if (buttonFlash != null) {
-            if (!CameraManager.get().isTorchAvailable() || !param_EnableFlash) {
-                buttonFlash.setVisibility(View.GONE);
-                return;
-
-            } else {
-                buttonFlash.setVisibility(View.VISIBLE);
-            }
-
-            if (flashOn) {
-                buttonFlash.setImageResource(resources.getIdentifier("flashbuttonon", "drawable", package_name));
-            } else {
-                buttonFlash.setImageResource(resources.getIdentifier("flashbuttonoff", "drawable", package_name));
-            }
-
-            CameraManager.get().setTorch(flashOn);
-
-            buttonFlash.postInvalidate();
-        }
-
     }
 
     @Override
@@ -369,7 +431,7 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
                     switch (msg.what) {
                         case MSG_AUTOFOCUS:
                             if (state == State.PREVIEW || state == State.DECODING) {
-                                CameraManager.get().requestAutoFocus(handler, MSG_AUTOFOCUS);
+                              //  CameraManager.get().requestAutoFocus(handler, MSG_AUTOFOCUS);
                             }
                             break;
                         case MSG_DECODE:
@@ -423,7 +485,7 @@ public class ScannerActivity extends Activity implements SurfaceHolder.Callback 
         CameraManager.get().startPreview();
         state = State.PREVIEW;
         CameraManager.get().requestPreviewFrame(handler, MSG_DECODE);
-        CameraManager.get().requestAutoFocus(handler, MSG_AUTOFOCUS);
+        //CameraManager.get().requestAutoFocus(handler, MSG_AUTOFOCUS);
     }
 
     public static void decode(final byte[] data, final int width, final int height) {

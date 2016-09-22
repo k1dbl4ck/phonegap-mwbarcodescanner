@@ -56,6 +56,8 @@
      <source-file src="src/android/res/layout/scanner.xml" target-dir="res/layout" />
      <source-file src="src/android/res/drawable/overlay_mw.png" target-dir="res/drawable" />
      <source-file src="src/android/res/drawable-hdpi/overlay_mw.png" target-dir="res/drawable-hdpi" />
+     <source-file src="src/android/res/drawable/autofocusoff.png" target-dir="res/drawable" />
+     <source-file src="src/android/res/drawable/autofocuson.png" target-dir="res/drawable" />     
      <source-file src="src/android/res/drawable/flashbuttonoff.png" target-dir="res/drawable" />
      <source-file src="src/android/res/drawable/flashbuttonon.png" target-dir="res/drawable" />
      <source-file src="src/android/res/drawable/zoom.png" target-dir="res/drawable" />
