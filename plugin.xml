@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    id="manateeworks-barcodescanner"
-    version="2.0.0">
+    id="com.manateeworks.barcodescanner"
+    version="1.6.1">
     <name>MWBarcodeScanner</name>
     <description>Manatee Works Barcode Scanner Plugin</description>
     <license>MIT</license>
@@ -15,26 +15,25 @@
     <asset src="www/MWBScanner.js" target="js/MWBScanner.js" />
     
     
-    <dependency id="cordova-plugin-dialogs" />
-    <dependency id="cordova-plugin-device" />
+    <dependency id="org.apache.cordova.dialogs" />
+    <dependency id="org.apache.cordova.device" />
     
     <!-- android -->
      <platform name="android">
-        
+     
+     
+     
+     
      <config-file target="res/xml/config.xml" parent="/*">
-    
-    <preference name="CrosswalkAnimatable" value="true" />
-
      <feature name="MWBarcodeScanner">
      <param name="android-package" value="com.manateeworks.BarcodeScannerPlugin"/>
      </feature>
      </config-file>
-    
-
+     
      <config-file target="AndroidManifest.xml" parent="/manifest/application">
      
      <activity android:name="com.manateeworks.ScannerActivity"
-     android:configChanges="orientation|keyboardHidden"
+     android:screenOrientation="landscape" android:configChanges="orientation|keyboardHidden"
      android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
      </activity>
      
@@ -43,21 +42,20 @@
      <config-file target="AndroidManifest.xml" parent="/manifest">
      
      <uses-permission android:name="android.permission.CAMERA" />
-     <uses-permission android:name="android.permission.INTERNET" />
-
+     
      </config-file>
      
      
-    <source-file src="src/android/libs/mwbscanner.jar" target-dir="libs" framework="true" />
-
+     
+     <source-file src="src/android/src/com/manateeworks/BarcodeScanner.java" target-dir="src/com/manateeworks" />
      <source-file src="src/android/src/com/manateeworks/BarcodeScannerPlugin.java" target-dir="src/com/manateeworks" />
      <source-file src="src/android/src/com/manateeworks/ScannerActivity.java" target-dir="src/com/manateeworks" />
+     <source-file src="src/android/src/com/manateeworks/MWOverlay.java" target-dir="src/com/manateeworks" />
+     <source-file src="src/android/src/com/manateeworks/camera/CameraManager.java" target-dir="src/com/manateeworks/camera" />
      
      <source-file src="src/android/res/layout/scanner.xml" target-dir="res/layout" />
-     <source-file src="src/android/res/drawable/overlay_mw.png" target-dir="res/drawable" />
-     <source-file src="src/android/res/drawable-hdpi/overlay_mw.png" target-dir="res/drawable-hdpi" />
-     <source-file src="src/android/res/drawable/autofocusoff.png" target-dir="res/drawable" />
-     <source-file src="src/android/res/drawable/autofocuson.png" target-dir="res/drawable" />     
+     <source-file src="src/android/res/drawable/overlay.png" target-dir="res/drawable" />
+     <source-file src="src/android/res/drawable-hdpi/overlay.png" target-dir="res/drawable-hdpi" />
      <source-file src="src/android/res/drawable/flashbuttonoff.png" target-dir="res/drawable" />
      <source-file src="src/android/res/drawable/flashbuttonon.png" target-dir="res/drawable" />
      <source-file src="src/android/res/drawable/zoom.png" target-dir="res/drawable" />
@@ -84,7 +82,6 @@
         <framework src="CoreVideo.framework" weak="false" />
         <framework src="CoreGraphics.framework" weak="false" />
         <framework src="QuartzCore.framework" weak="false" />
-        <framework src="CoreLocation.framework" weak="false" />
                
         <header-file src="src/ios/CDVMWBarcodeScanner.h" target-dir="MWBarcodeScanner"/>
         <source-file src="src/ios/CDVMWBarcodeScanner.m" target-dir="MWBarcodeScanner"/>
@@ -94,15 +91,15 @@
         <header-file src="src/ios/MWBarcodeScanner/MWOverlay.h" target-dir="MWBarcodeScanner"/>
         <source-file src="src/ios/MWBarcodeScanner/MWOverlay.m" target-dir="MWBarcodeScanner"/>
         <header-file src="src/ios/MWBarcodeScanner/MWResult.h" target-dir="MWBarcodeScanner"/>
-        <source-file src="src/ios/MWBarcodeScanner/MWParser.h" target-dir="MWBarcodeScanner"/>
+        <source-file src="src/ios/MWBarcodeScanner/MWResult.m" target-dir="MWBarcodeScanner"/>
         <source-file src="src/ios/MWBarcodeScanner/MWScannerViewController.xib" target-dir="MWBarcodeScanner"/>
         <source-file src="src/ios/MWBarcodeScanner/libBarcodeScanner.a" target-dir="MWBarcodeScanner" framework="true"/>
         
         <resource-file src="src/ios/MWBarcodeScanner/close_button.png" target-dir="MWBarcodeScanner"/>
         <resource-file src="src/ios/MWBarcodeScanner/flashbuttonon.png" target-dir="MWBarcodeScanner"/>
         <resource-file src="src/ios/MWBarcodeScanner/flashbuttonoff.png" target-dir="MWBarcodeScanner"/>
-        <resource-file src="src/ios/MWBarcodeScanner/overlay_mw.png" target-dir="MWBarcodeScanner"/>
-        <resource-file src="src/ios/MWBarcodeScanner/overlay_mw@2x.png" target-dir="MWBarcodeScanner"/>
+        <resource-file src="src/ios/MWBarcodeScanner/overlay.png" target-dir="MWBarcodeScanner"/>
+        <resource-file src="src/ios/MWBarcodeScanner/overlay@2x.png" target-dir="MWBarcodeScanner"/>
         <resource-file src="src/ios/MWBarcodeScanner/zoom.png" target-dir="MWBarcodeScanner"/>
         
     </platform>
@@ -126,7 +123,7 @@
         <source-file src="src/wp8/MWBarcodeScanner/ScannerPage.xaml.cs" />
         <source-file src="src/wp8/MWBarcodeScanner/ScannerPage.xaml"/>
     <source-file src="src/wp8/MWBarcodeScanner/MWOverlay.cs"/>
-        <source-file src="src/wp8/MWBarcodeScanner/overlay_mw.png"/>
+        <source-file src="src/wp8/MWBarcodeScanner/overlay.png"/>
     <source-file src="src/wp8/MWBarcodeScanner/flashbuttonon.png"/>
     <source-file src="src/wp8/MWBarcodeScanner/flashbuttonoff.png"/>
     <source-file src="src/wp8/MWBarcodeScanner/zoom.png"/>
@@ -146,5 +143,5 @@
         
     </platform>
 
-	
+    
 </plugin>

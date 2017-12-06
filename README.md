@@ -1,10 +1,10 @@
-Manatee Works Barcode Scanner SDK Plugin
+Manatee Works Barcode Scanner Plugin
 =========================
- Version 2.0
+ Version 1.6
 
-Guide on how to add the Manatee Works Barcode Scanner SDK PhoneGap plugin to your project(s)
+Guide on how to add the Manatee Works Barcode Scanner Phonegap plugin to your project(s)
 
-*For more in-depth info, visit our website at [www.manateeworks.com](https://manateeworks.com/)*
+*For more in-depth info, visit our website at [www.manateeworks.com](http://manateeworks.com/)*
 
 
 ##Install using CLI interface (Phonegap 3.0 and above)
@@ -22,7 +22,7 @@ Guide on how to add the Manatee Works Barcode Scanner SDK PhoneGap plugin to you
 * Add plugin to the project with:
 
 
-		 phonegap plugin add manateeworks-barcodescanner
+		 phonegap local plugin add com.manateeworks.barcodescanner
 
 
 	or   
@@ -53,7 +53,7 @@ Guide on how to add the Manatee Works Barcode Scanner SDK PhoneGap plugin to you
 * Copy confing.xml from project’s dir to /www
 * Add  this line in www/confing.xml:
     
-        <gap:plugin name="manateeworks-barcodescanner" source="npm"/>
+        <gap:plugin name="com.manateeworks.barcodescanner" />
 
 * Add this code in www/index.html:
 
@@ -66,81 +66,6 @@ Guide on how to add the Manatee Works Barcode Scanner SDK PhoneGap plugin to you
 * Upload www.zip to build.phonegap.com 
 * Build
 
-
-##How to scan an image
-
-* Instead of scanner.startScanning() use:
-
-        scanner.scanImage(URI);
-        
-        
-    or with custom init and callback:
-    
-        scanImage(MWBSInitSpace.init,MWBSInitSpace.callback,URI);
-        
-* Params:   
-        
-        URI                     - the path to the image
-        MWBSInitSpace.init      - scanner initialisation
-        MWBSInitSpace.callback  - result callback
-
-##How to scan in partial screen view
-
-* Instead of scanner.startScanning() use:
-
-        scanner.startScanning(x, y, width, height);
-        
-        
-    or with custom init and callback:
-    
-        startScanning(MWBSInitSpace.init, MWBSInitSpace.callback, x, y, width, height);
-        
-
-        
-* Params:   
-        
-        x, y, width, height     - rectangle of the view in percentages relative to the screen size
-        MWBSInitSpace.init      - scanner initialisation
-        MWBSInitSpace.callback  - result callback
-
-* Example:   
-
-        <form style="width: 100%; text-align: center;">
-                <input type="button" value="Scan fullscreen" onclick="scanner.startScanning()" style="font-size: 12px; width: 105px; height: 30px; margin-top: 10px;"/>
-                <input type="button" value="Scan in view" onclick="scanner.startScanning(0,4,100,50)" style="font-size: 12px; width: 105px; height: 30px; margin-top: 10px;"/>
-                <input type="button" value="Pause/Resume" onclick="scanner.togglePauseResume()" style="font-size: 12px; width: 105px; height: 30px; margin-top: 10px;"/>
-                <input type="button" value="Close" onclick="scanner.closeScanner()" style="font-size: 12px; width: 105px; height: 30px; margin-top: 10px;"/>
-                <input type="button" value="Flash" onclick="scanner.toggleFlash()" style="font-size: 12px; width: 105px; height: 30px; margin-top: 10px;"/>
-                <input type="button" value="Zoom" onclick="scanner.toggleZoom()" style="font-size: 12px; width: 105px; height: 30px; margin-top: 10px;"/>
-            </form>
-            <ul id="mwb_list">
-                
-            </ul>
-	   </br>
-        
-        
-##Important change in 2.0
-        
-* The registration call functions have been completely revamped. License credentials issued prior to v. 3.0 will no longer work with the new and future releases.
-
-
-##Important change in 1.9
-
-New feature: Parsers. Users can now parse the scanned result. 
-    
-     mwbs['MWBsetActiveParser'](constants.MWP_PARSER_MASK_ISBT);
-        Available options:
-               MWP_PARSER_MASK_NONE
-               MWP_PARSER_MASK_AUTO 
-               MWP_PARSER_MASK_GS1 
-               MWP_PARSER_MASK_IUID
-               MWP_PARSER_MASK_ISBT
-               MWP_PARSER_MASK_AAMVA
-               MWP_PARSER_MASK_HIBC
-               
-##Important change in 1.8.8
-
-Support for android app permissions requires using Cordova-Android 5.0.0+. In order to use our plugin on Cordova-Android <5.0.0 consider downgrading to 1.8.7
 
 ##Important change in 1.5
 
@@ -187,7 +112,7 @@ It's seems there's a bug in Phonegap 3.0 so you have to add ```html '<script typ
 
 * Copy the file 'src/android/res/layout/scanner.xml' to your project's 'res/layout' folder;
 
-* Copy the file 'src/android/res/drawable/overlay_mw.png' to your project's 'res/drawable' folder. Do the same for the file in 'drawable-hdpi' folder;
+* Copy the file 'src/android/res/drawable/overlay.png' to your project's 'res/drawable' folder. Do the same for the file in 'drawable-hdpi' folder;
 
 * Copy the files 'src/android/libs/armeabi/libBarcodeScannerLib.so' and 'Android/libs/armeabi-v7a/libBarcodeScannerLib.so' to your project's 'libs/' folder, all the while preserving the same folder structure 
 
@@ -237,7 +162,7 @@ For Phonegap 3 *
 
 * Run the app and test the scanner by pressing the previously added button;
 
-* (Optional): You can also replace our default overlay_mw.png for the camera screen with your own customized image;
+* (Optional): You can also replace our default overlay.png for the camera screen with your own customized image;
 
 * (For Phonegap 3) If notification plugin is not present in project, add it by following instructions from this url:
 
@@ -314,7 +239,7 @@ For Phonegap 3
 * Run the app and test the scanner by pressing the previously added button;
 
 
-* (Optional): You can replace our default overlay_mw.png and close_button.png for the camera screen with your own customized image;
+* (Optional): You can replace our default overlay.png and close_button.png for the camera screen with your own customized image;
 
 
 
@@ -403,91 +328,15 @@ Add a notification plugin (if not already present):
 * Run the app and test the scanner by pressing the previously added button;
 
 
-* (Optional): You can replace our default overlay_mw.png for the camera screen with your own customized image;
-
-&nbsp;
-###Changes in 2.0:
-&nbsp;
-- Decoding library updated to 3.0
-- The registration functions have been revamped. License credentials issued prior to version 3.0 will no longer work with this and future releases.
-- UPC/EAN decoder options now support a flag to disable add-on scanning
-- Barcode location support has been implemented for 1D barcodes (Codabar, Code 25, Code 39, Code 93, Code 128, EAN & UPC) - not enabled by default, can be activated by using mwbs['MWBsetFlags'](0, constants.MWB_CFG_GLOBAL_CALCULATE_1D_LOCATION);
-- PDF417 decoding has improved damage resistance making it easier to scan damaged codes
-- Greatly improved the recognition of dotted Data Matrix 
-- Rectangular Data Matrix codes with DMRE extension now supported
-- Better recognition of Code 39 stop pattern
-- Other bugfixes and performance improvements
-
-&nbsp;
-###Changes in 1.9:
-&nbsp;
-- Added Parsers: GS1, IUID, ISBT, AAMVA, HIBC
-- Bug fixes
-
-&nbsp;
-###Changes in 1.8.8:
-&nbsp;
-- Added support for android API 23 app permissions:
-- Bug fixes
-
-&nbsp;
-###Changes in 1.8.6:
-&nbsp;
-- Added option for using the front facing camera:
-
-        mwbs['MWBuseFrontCamera'](true);
-        
-- Bug fixes
-
-&nbsp;
-###Changes in 1.8.2:
-&nbsp;
-- Added option to set scanning rectangle for partial view scanning. To use it just add the following line to the scanner configuration:
-
-        mwbs['MWBuseAutoRect'](false);
-        
-- Bug fixes
-
-&nbsp;
-###Changes in 1.8:
-&nbsp;
-- Added new feature that makes possible scanning in view:
-
-        scanner.startScanning(x, y, width, height); 
-        //all parameters represent percentages relative to the screen size
-        
-- Other methods for partial screen scanning control:
-
-        scanner.togglePauseResume() - toggle pause resume scanning
-        scanner.closeScanner()       - stop and remove scanner view
-        scanner.toggleFlash()       - toggle flash on/off
-        scanner.toggleZoom()        - toggle zoom in/out
-
-
-&nbsp;
-###Changes in 1.7.1:
-&nbsp;
-- Added flags for including symbology identifiers in results
-
-
-&nbsp;
-###Changes in 1.7:
-&nbsp;
-- Added scanImage(URI) which can be used for image scanning. Optionally, the method can be used with custom init and callback  - scanImage(MWBSInitSpace.init,MWBSInitSpace.callback,URI);
-
-        URI                     - the path to the image
-        MWBSInitSpace.init      - scanner initialisation
-        MWBSInitSpace.callback  - result callback
-
+* (Optional): You can replace our default overlay.png for the camera screen with your own customized image;
 
 &nbsp;
 ###Changes in 1.6:
 &nbsp;
 - Added continuous scanning functionality:
-
         mwbs['MWBcloseScannerOnDecode'](false)  - to enable continuous scanning
-        scanner.resumeScanning()                - for resuming after successful scan
-        scanner.closeScanner()                   - to finish with continuous scanning
+        BarcodeScanner.MWBresumeScanning()      - for resuming after successful scan
+        BarcodeScanner.MWBcloseScanner()        - to finish with continuous scanning
     
 - Added support for 64bit android devices.
 - Camera overlay bug fixes.

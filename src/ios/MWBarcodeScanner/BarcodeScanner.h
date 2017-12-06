@@ -40,20 +40,6 @@ typedef unsigned char uint8_t;
 #define MWB_RT_NOT_SUPPORTED        -2
 #define MWB_RT_BAD_PARAM            -3
 /** @} */
-    
-/**
- * @name Basic return values for RegisterSDK function
- * @{
- */
-#define MWB_RTREG_OK                   0
-#define MWB_RTREG_INVALID_KEY         -1
-#define MWB_RTREG_INVALID_CHECKSUM    -2
-#define MWB_RTREG_INVALID_APPLICATION -3
-#define MWB_RTREG_INVALID_SDK_VERSION -4
-#define MWB_RTREG_INVALID_KEY_VERSION -5
-#define MWB_RTREG_INVALID_PLATFORM    -6
-#define MWB_RTREG_KEY_EXPIRED         -7
-/** @} */
 
 /**
  ** @name    Configuration values for use with MWB_setFlags
@@ -70,22 +56,6 @@ typedef unsigned char uint8_t;
 /** @brief  Global decoder flags value: apply rotation on input image
  */
 #define  MWB_CFG_GLOBAL_ROTATE90                        0x04
-#define  MWB_CFG_GLOBAL_ROTATE180                       0x08
-    
-/** @brief  Global decoder flags value: calculate location for 1D barcodeTypes (Code128, Code93, Code39 supported)
-  */
-#define  MWB_CFG_GLOBAL_CALCULATE_1D_LOCATION           0x10
-    
-/** @brief  Global decoder flags value: fail 1D decode if result is not confirmed by location expanding (Code128, Code93, Code39 supported)
-  */
-#define  MWB_CFG_GLOBAL_VEIRIFY_1D_LOCATION             0x20
-    
-/** @brief  Global decoder flags value: fail decode if result is not touching the center of viewfinder (2D + Code128, Code93, Code39 supported)
- * 1D locaiton flags will be enabled automatically with this one
-  */
-#define  MWB_CFG_GLOBAL_USE_CENTRIC_SCANNING            0x40
-    
-    
     
 
 /** @brief  Code39 decoder flags value: require checksum check
@@ -106,11 +76,6 @@ typedef unsigned char uint8_t;
 /** @brief  Code93 decoder flags value: decode full ASCII
  */
 #define  MWB_CFG_CODE93_EXTENDED_MODE       0x8
-/**/
-    
-/** @brief  UPC/EAN decoder disable addons detection
- */
-#define  MWB_CFG_EANUPC_DISABLE_ADDON       0x1
 /**/
     
     
@@ -203,15 +168,6 @@ typedef unsigned char uint8_t;
 #define MWB_SUBC_MASK_C25_ITF14         0x00000004u
 #define MWB_SUBC_MASK_C25_IATA          0x00000008u
 /** @} */
-    
-/**
- * @name Bit mask identifiers for UPC/EAN decoder types
- * @{ */
-#define MWB_SUBC_MASK_EANUPC_EAN_13     0x00000001u
-#define MWB_SUBC_MASK_EANUPC_EAN_8      0x00000002u
-#define MWB_SUBC_MASK_EANUPC_UPC_A      0x00000004u
-#define MWB_SUBC_MASK_EANUPC_UPC_E      0x00000008u
-/** @} */
 
 /**
  * @name Bit mask identifiers for 1D scanning direction 
@@ -286,14 +242,6 @@ enum res_types {
 #define MWB_RESULT_FT_IMAGE_HEIGHT          0x00000009u
 #define MWB_RESULT_FT_PARSER_BYTES          0x0000000Au
 
-#define MWB_RESULT_FT_MODULES_COUNT_X       0x0000000Bu
-#define MWB_RESULT_FT_MODULES_COUNT_Y       0x0000000Cu
-#define MWB_RESULT_FT_MODULE_SIZE_X         0x0000000Du
-#define MWB_RESULT_FT_MODULE_SIZE_Y         0x0000000Eu
-#define MWB_RESULT_FT_SKEW                  0x0000000Fu
-    
-    
-
     /** @} */
     
     /**
@@ -309,13 +257,6 @@ enum res_types {
 #define MWB_RESULT_FNAME_IMAGE_WIDTH        "Image Width"
 #define MWB_RESULT_FNAME_IMAGE_HEIGHT       "Image Height"
 #define MWB_RESULT_FNAME_PARSER_BYTES       "Parser Input"
-
-#define MWB_RESULT_FNAME_MODULES_COUNT_X    "Modules Count X"
-#define MWB_RESULT_FNAME_MODULES_COUNT_Y    "Modules Count Y"
-#define MWB_RESULT_FNAME_MODULE_SIZE_X      "Module Size X"
-#define MWB_RESULT_FNAME_MODULE_SIZE_Y      "Module Size Y"
-#define MWB_RESULT_FNAME_SKEW               "Skew"
-
     
     /** @} */
     
@@ -386,20 +327,24 @@ extern int MWB_setScanningRect(const uint32_t codeMask, float left, float top, f
 extern int MWB_getScanningRect(const uint32_t codeMask, float *left, float *top, float *width, float *height);
     
     
-    
-    
+
 /**
- * Registers licensing information for all SDK functionality.
- * It should be called once on app startup.
+ * Registers licensing information with single selected decoder type.
+ * If registering information is correct, enables full support for selected
+ * decoder type.
+ * It should be called once per decoder type.
  *
+ * @param[in]   codeMask                Single decoder type selector (MWB_CODE_MASK_...)
+ * @param[in]   userName                User name string
  * @param[in]   key                     License key string
- *
+ * 
  * @retval      MWB_RT_OK               Registration successful
- * @retval      < 0                     Error code - see MWB_RTREG values
+ * @retval      MWB_RT_FAIL             Registration failed
+ * @retval      MWB_RT_BAD_PARAM        More than one decoder flag selected
+ * @retval      MWB_RT_NOT_SUPPORTED    Selected decoder type or its registration
+ *                                      is not supported
  */
-extern int MWB_registerSDK(const char * key);
-
-
+extern int MWB_registerCode(const uint32_t codeMask, const char * userName, const char * key);
 
 /**
  * Sets active or inactive status of decoder types and updates decoder execution priority list.
@@ -634,17 +579,6 @@ extern int MWB_setResultType(const uint32_t resultType);
 */
 extern int MWB_getResultType(void);
     
-    
-    
-/*
- * Set time in seconds in which decoder will ignore same barcode detected
- */
-extern int MWB_setDuplicatesTimeout(uint32_t timeout);
-    
-/*
- * Set code which would be check for a duplicate
- */
-extern void MWB_setDuplicate(uint8_t* barcode, int length);
     
 
 /**

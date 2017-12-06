@@ -8,7 +8,6 @@ using System.ComponentModel;
 using BarcodeLib;
 
 
-
 namespace BarcodeScanners
 {
     public class ScannerResult
@@ -17,11 +16,7 @@ namespace BarcodeScanners
         public string type { get; set; }
         public byte[] bytes { get; set; }
         public bool isGS1 { get; set; }
-        public Object location { get; set; }
-        public int imageWidth { get; set; }
-        public int imageHeight { get; set; }
     }
-
         class PointF
         {
             public float x;
@@ -69,8 +64,7 @@ namespace BarcodeScanners
         {
             public String text;
             public byte[] bytes;
-           public byte[] encryptedResult;
-           public int bytesLength;
+            public int bytesLength;
             public int type;
             public int subtype;
             public int imageWidth;
@@ -185,19 +179,9 @@ namespace BarcodeScanners
                                                         {
                                                             result.bytes[c] = buffer[contentPos + c];
                                                         }
-                                                     }else if(fieldType == Scanner.MWB_RESULT_FT_PARSER_BYTES)
-                                                         {
-                                                            result.encryptedResult = new byte[fieldContentLength + 1];
-                                                            result.encryptedResult[fieldContentLength] = 0;
-                                                            Buffer.BlockCopy(buffer, contentPos, result.encryptedResult, 0, fieldContentLength);
-                                                        }
+                                                    }
 
-
-
-
-
-       
-                    currentPos += (fieldNameLength + fieldContentLength + 4);
+                        currentPos += (fieldNameLength + fieldContentLength + 4);
 
                     }
 
@@ -250,10 +234,10 @@ namespace BarcodeScanners
                   Scanner.MWBregisterCode(Scanner.MWB_CODE_MASK_PDF, "username", "key");
                   Scanner.MWBregisterCode(Scanner.MWB_CODE_MASK_QR, "username", "key");
                   Scanner.MWBregisterCode(Scanner.MWB_CODE_MASK_RSS, "username", "key");
-                  Scanner.MWBregisterCode(Scanner.MWB_CODE_MASK_CODABAR, "username", "key");
+                  Scanner.MWBregisterCode(Scanner.MWB_CODE_MASK_CODABAR, "username", "key");*/
                 Scanner.MWBregisterCode(Scanner.MWB_CODE_MASK_DOTCODE, "username", "key");
                 Scanner.MWBregisterCode(Scanner.MWB_CODE_MASK_11, "username", "key");
-                Scanner.MWBregisterCode(Scanner.MWB_CODE_MASK_MSI, "username", "key");*/
+                Scanner.MWBregisterCode(Scanner.MWB_CODE_MASK_MSI, "username", "key");
 
 
                 // choose code type or types you want to search for
@@ -300,7 +284,7 @@ namespace BarcodeScanners
                     MWBsetScanningRect(Scanner.MWB_CODE_MASK_DOTCODE, RECT_DOTCODE);
                     MWBsetScanningRect(Scanner.MWB_CODE_MASK_11, RECT_FULL_1D);
                     MWBsetScanningRect(Scanner.MWB_CODE_MASK_MSI, RECT_FULL_1D);
-                
+
                 }
 
                 // But for better performance, only activate the symbologies your application requires...
@@ -406,7 +390,11 @@ namespace BarcodeScanners
                 if (result.type == Scanner.FOUND_MSI) typeName = "MSI Plessey";
 			    if (result.type == Scanner.FOUND_25_IATA) typeName = "IATA Code 25";
 
-              
+                if (result.isGS1)
+                {
+                    typeName += " (GS1)";
+                }
+
                 return typeName;
             }
 
@@ -435,7 +423,6 @@ namespace BarcodeScanners
 
             private static void bw_DoWork(object sender, DoWorkEventArgs e)
             {
-
                 BackgroundWorker worker = sender as BackgroundWorker;
 
                 while (1 == 1)

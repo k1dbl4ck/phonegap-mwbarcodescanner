@@ -8,11 +8,10 @@
 
 #import "MWScannerViewController.h"
 #import <Cordova/CDV.h>
-#import "MWResult.h"
 
 @interface CDVMWBarcodeScanner : CDVPlugin <ScanningFinishedDelegate>
 
-- (void)scanningFinished:(NSString *)result withType:(NSString *)lastFormat isGS1: (bool) isGS1 andRawResult: (NSData *) rawResult locationPoints:(MWLocation *)locationPoints imageWidth:(int)imageWidth imageHeight:(int)imageHeight;
+- (void)scanningFinished:(NSString *)result withType:(NSString *)lastFormat isGS1: (bool) isGS1 andRawResult: (NSData *) rawResult;
 - (void)initDecoder:(CDVInvokedUrlCommand*)command;
 - (void)startScanner:(CDVInvokedUrlCommand*)command;
 - (void)setActiveCodes:(CDVInvokedUrlCommand*)command;
@@ -33,8 +32,6 @@
 - (void)setZoomLevels:(CDVInvokedUrlCommand*)command;
 - (void)setMaxThreads:(CDVInvokedUrlCommand*)command;
 - (void)setCustomParam:(CDVInvokedUrlCommand*)command;
-- (void)scanImage:(CDVInvokedUrlCommand*)command;
-- (void)setParam:(CDVInvokedUrlCommand*)command;
 
 @end
 

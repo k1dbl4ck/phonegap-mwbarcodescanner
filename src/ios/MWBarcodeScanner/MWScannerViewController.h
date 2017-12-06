@@ -8,14 +8,12 @@
 #import <CoreGraphics/CoreGraphics.h>
 #import <CoreVideo/CoreVideo.h>
 #import <CoreMedia/CoreMedia.h>
-#import "MWResult.h"
 
 #define OM_MW       1
 #define OM_IMAGE    2
 
-
 @protocol ScanningFinishedDelegate <NSObject>
-- (void)scanningFinished:(NSString *)result withType:(NSString *)lastFormat isGS1: (bool) isGS1 andRawResult: (NSData *) rawResult locationPoints:(MWLocation *)locationPoints imageWidth:(int)imageWidth imageHeight:(int)imageHeight;
+- (void)scanningFinished:(NSString *)result withType: (NSString *) lastFormat isGS1: (bool) isGS1 andRawResult: (NSData *) rawResult;
 @end
 
 
@@ -33,6 +31,7 @@
 +(DecoderResult *)createFailure;
 
 @end
+
 
 
 typedef enum eMainScreenState {
@@ -61,7 +60,6 @@ typedef enum eMainScreenState {
 
 
 @property (nonatomic, assign) MainScreenState state;
-
 @property (nonatomic, retain) AVCaptureSession *captureSession;
 @property (nonatomic, retain) AVCaptureVideoPreviewLayer *prevLayer;
 @property (nonatomic, retain) AVCaptureDevice *device;
@@ -73,27 +71,16 @@ typedef enum eMainScreenState {
 
 
 - (IBAction)doClose:(id)sender;
-- (IBAction)doZoomToggle:(id)sender;
-- (IBAction)doFlashToggle:(id)sender;
-
 + (void) initDecoder;
-- (AVCaptureVideoPreviewLayer *)generateLayerWithRect:(CGPoint)bottomRightPoint;
-
 + (void) setInterfaceOrientation: (UIInterfaceOrientationMask) interfaceOrientation;
 + (void) enableHiRes: (BOOL) hiRes;
 + (void) enableFlash: (BOOL) flash;
 + (void) turnFlashOn: (BOOL) flashOn;
 + (void) setOverlayMode: (int) overlayMode;
-+ (int) getOverlayMode;
-- (void) deinitCapture;
 + (void) enableZoom: (BOOL) zoom;
 + (void) setMaxThreads: (int) maxThreads;
 + (void) setZoomLevels: (int) zoomLevel1 zoomLevel2: (int) zoomLevel2 initialZoomLevel: (int) initialZoomLevel;
 + (void) closeScannerOnDecode: (BOOL) close;
-+ (BOOL) getCloseScannerOnDecode;
-
-+ (void) use60fps: (BOOL) use;
-+ (void) setUseFrontCamera: (BOOL) use;
 
 - (void)revertToNormal;
 - (void)decodeResultNotification: (NSNotification *)notification;
@@ -101,9 +88,6 @@ typedef enum eMainScreenState {
 - (void) startScanning;
 - (void) stopScanning;
 - (void) toggleTorch;
-+ (BOOL) isFlashEnabled;
-+ (BOOL) isZoomEnabled;
-+ (void) setActiveParser: (int) parserType;
 
 
 @end

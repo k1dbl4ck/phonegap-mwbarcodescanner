@@ -40,14 +40,6 @@
 @property (nonatomic, retain) MWLocation *locationPoints;
 
 
-@property (readwrite) int modulesCountX;
-@property (readwrite) int modulesCountY;
-@property (readwrite) float moduleSizeX;
-@property (readwrite) float moduleSizeY;
-@property (readwrite) float skew;
-
-
-
 @end
 
 

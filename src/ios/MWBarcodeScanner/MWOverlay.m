@@ -47,8 +47,6 @@ float lastHeight = -1;
 int imageWidth = 1;
 int imageHeight = 1;
 
-BOOL isPaused = NO;
-
 
 
 + (void) updatePreviewLayer {
@@ -106,13 +104,6 @@ BOOL isPaused = NO;
     
     isAttached = NO;
     
-}
-
-+ (void) setPaused: (BOOL) paused{
-    isPaused = paused;
-    if (instance != nil && previewLayer != nil && lineLayer != nil){
-       [instance performSelectorOnMainThread:@selector(updateOverlayMainThread) withObject:nil waitUntilDone:NO];
-    }
 }
 
 - (void) checkForChanges {
@@ -293,39 +284,30 @@ BOOL isPaused = NO;
         orientation = orientation | mask;
         
     }
-    if (isPaused){
-        CGContextSetRGBFillColor(context, r, g, b, 1);
-        float size = MIN(overlayHeight, overlayWidth) / 10;
-        CGContextFillRect(context, CGRectMake(rect.origin.x + rect.size.width / 2 - size / 2, rect.origin.y + rect.size.height / 2 - size / 2, size / 3, size));
-        
-        CGContextFillRect(context, CGRectMake(rect.origin.x + rect.size.width / 2 + size / 6, rect.origin.y + rect.size.height / 2 - size / 2, size / 3, size));
-        
-        
-    } else {
     
-        if (orientation & MWB_SCANDIRECTION_HORIZONTAL || orientation & MWB_SCANDIRECTION_OMNI || orientation & MWB_SCANDIRECTION_AUTODETECT){
-            CGContextSetLineWidth(context, blinkingLineWidth);
-            CGContextMoveToPoint(context, rect.origin.x, rect.origin.y + rect.size.height / 2);
-            CGContextAddLineToPoint(context, rect.origin.x + rect.size.width, rect.origin.y + rect.size.height / 2);
-            CGContextStrokePath(context);
-        }
+    
+    if (orientation & MWB_SCANDIRECTION_HORIZONTAL || orientation & MWB_SCANDIRECTION_OMNI || orientation & MWB_SCANDIRECTION_AUTODETECT){
+        CGContextSetLineWidth(context, blinkingLineWidth);
+        CGContextMoveToPoint(context, rect.origin.x, rect.origin.y + rect.size.height / 2);
+        CGContextAddLineToPoint(context, rect.origin.x + rect.size.width, rect.origin.y + rect.size.height / 2);
+        CGContextStrokePath(context);
+    }
+    
+    if (orientation & MWB_SCANDIRECTION_VERTICAL || orientation & MWB_SCANDIRECTION_OMNI || orientation & MWB_SCANDIRECTION_AUTODETECT){
         
-        if (orientation & MWB_SCANDIRECTION_VERTICAL || orientation & MWB_SCANDIRECTION_OMNI || orientation & MWB_SCANDIRECTION_AUTODETECT){
-            
-            CGContextMoveToPoint(context, rect.origin.x + rect.size.width / 2, rect.origin.y);
-            CGContextAddLineToPoint(context, rect.origin.x + rect.size.width / 2, rect.origin.y + rect.size.height);
-            CGContextStrokePath(context);
-        }
+        CGContextMoveToPoint(context, rect.origin.x + rect.size.width / 2, rect.origin.y);
+        CGContextAddLineToPoint(context, rect.origin.x + rect.size.width / 2, rect.origin.y + rect.size.height);
+        CGContextStrokePath(context);
+    }
+    
+    if (orientation & MWB_SCANDIRECTION_OMNI || orientation & MWB_SCANDIRECTION_AUTODETECT){
+        CGContextMoveToPoint(context, rect.origin.x , rect.origin.y);
+        CGContextAddLineToPoint(context, rect.origin.x + rect.size.width , rect.origin.y + rect.size.height);
+        CGContextStrokePath(context);
         
-        if (orientation & MWB_SCANDIRECTION_OMNI || orientation & MWB_SCANDIRECTION_AUTODETECT){
-            CGContextMoveToPoint(context, rect.origin.x , rect.origin.y);
-            CGContextAddLineToPoint(context, rect.origin.x + rect.size.width , rect.origin.y + rect.size.height);
-            CGContextStrokePath(context);
-            
-            CGContextMoveToPoint(context, rect.origin.x + rect.size.width, rect.origin.y);
-            CGContextAddLineToPoint(context, rect.origin.x , rect.origin.y + rect.size.height);
-            CGContextStrokePath(context);
-        }
+        CGContextMoveToPoint(context, rect.origin.x + rect.size.width, rect.origin.y);
+        CGContextAddLineToPoint(context, rect.origin.x , rect.origin.y + rect.size.height);
+        CGContextStrokePath(context);
     }
     
     lineLayer.contents = (id)[UIGraphicsGetImageFromCurrentImageContext() CGImage];
